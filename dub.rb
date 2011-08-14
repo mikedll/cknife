@@ -13,9 +13,10 @@ duout.each do |l|
 end
 
 unit_to_mult = {
-  'K' => 1,
-  'M' => 2**10,
-  'G' => 2**20
+  'B' => 1,
+  'K' => 2**10,
+  'M' => 2**20,
+  'G' => 2**30
 }
 
 comps.sort! do |a, b|
@@ -23,5 +24,5 @@ comps.sort! do |a, b|
 end
 
 comps.each do |(size,unit,path)|
-  puts "#{size}#{unit} #{path}"
+  printf( "%10.1f%s %s\n", size, unit, path)
 end
