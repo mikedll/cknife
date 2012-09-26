@@ -1,3 +1,5 @@
+dub
+==============
 
 Like du, but sorts your output by size. Compare:
 
@@ -19,4 +21,7 @@ Like du, but sorts your output by size. Compare:
           14.0G ./Library
          673.0M ./Work
            0.0B ./Colloquy Transcripts
-       
+
+## options      
+
+    -c Enable colorized output. 
