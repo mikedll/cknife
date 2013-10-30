@@ -50,7 +50,7 @@ class Zerigo < Thor
     end
   end
 
-  desc "download [BUCKET_NAME]", "Show files in  bucket"
+  desc "download [BUCKET_NAME]", "Download all files in  bucket to CWD"
   def download(bucket_name)
     d = fog_storage.directories.select { |d| d.key == bucket_name }.first
     if d.nil?

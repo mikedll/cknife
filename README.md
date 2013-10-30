@@ -20,7 +20,7 @@ command line tool wrappers that don't use Thor.
       aws.rb afew [BUCKET_NAME]      # Show first 5 files in bucket
       aws.rb create [BUCKET_NAME]    # Create a bucket
       aws.rb delete [BUCKET_NAME]    # Show all buckets
-      aws.rb download [BUCKET_NAME]  # Show files in bucket
+      aws.rb download [BUCKET_NAME]  # Download all files in  bucket to CWD
       aws.rb help [TASK]             # Describe available tasks or one specific task
       aws.rb list                    # Show all buckets
 
