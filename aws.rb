@@ -73,7 +73,7 @@ class Zerigo < Thor
   end
 
 
-  desc "delete [BUCKET_NAME]", "Show all buckets"
+  desc "delete [BUCKET_NAME]", "Delete a bucket"
   def delete(bucket_name)
     d = fog_storage.directories.select { |d| d.key == bucket_name }.first
 
