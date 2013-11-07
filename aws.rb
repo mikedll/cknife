@@ -9,23 +9,65 @@ Bundler.require
 
 require 'active_support/all'
 
-class Zerigo < Thor
+class Aws < Thor
 
   KEY = ENV["KEY"] || ENV['AMAZON_ACCESS_KEY_ID']
   SECRET = ENV["SECRET"] || ENV['AMAZON_SECRET_ACCESS_KEY']
 
   no_tasks do
-    def fog_storage
+
+    def fog_opts
       opts = {
+        :provider => 'AWS',
         :aws_access_key_id => KEY,
-        :aws_secret_access_key => SECRET,
-        :provider => 'AWS'
-      }
-      @storage ||= Fog::Storage.new(opts)
+        :aws_secret_access_key => SECRET
+      }      
     end
 
-    def show_buckets()
+    def fog_storage
+      @storage ||= Fog::Storage.new(fog_opts)
+    end
+
+    def fog_compute
+      @compute ||= Fog::Compute.new(fog_opts)
+    end
+
+    def show_buckets
       fog_storage.directories.sort { |a,b| a.key <=> b.key }.each { |b| puts "#{b.key}" }
+    end
+
+    def show_servers
+      fog_compute.servers.sort { |a,b| a.key_name <=> b.key_name }.each do |s|
+        puts "#{s.tags['Name']} (state: #{s.state}): id=#{s.id} keyname=#{s.key_name} dns=#{s.dns_name} flavor=#{s.flavor_id}"
+      end
+    end
+  end
+
+  desc "list_servers", "Show all servers"
+  def list_servers
+    show_servers
+  end
+
+  desc "start_server [SERVER_ID]", "Start a given EC2 server"
+  def start_server(server_id)
+    s = fog_compute.servers.select { |s| s.id == server_id}.first
+    if s
+      say("found server. starting/resuming. #{s.id}")
+      s.start
+      show_servers
+    else
+      say("no server with that id found. nothing done.")
+    end
+  end
+
+  desc "stop_server [SERVER_ID]", "Stop a given EC2 server (does not terminate it)"
+  def stop_server(server_id)
+    s = fog_compute.servers.select { |s| s.id == server_id}.first
+    if s
+      say("found server. stopping. #{s.id}")
+      s.stop
+    else
+      say("no server with that id found. nothing done.")
     end
   end
 
@@ -50,7 +92,7 @@ class Zerigo < Thor
     end
   end
 
-  desc "download [BUCKET_NAME]", "Download all files in  bucket to CWD"
+  desc "download [BUCKET_NAME]", "Show files in  bucket"
   def download(bucket_name)
     d = fog_storage.directories.select { |d| d.key == bucket_name }.first
     if d.nil?
@@ -73,7 +115,7 @@ class Zerigo < Thor
   end
 
 
-  desc "delete [BUCKET_NAME]", "Delete a bucket"
+  desc "delete [BUCKET_NAME]", "Show all buckets"
   def delete(bucket_name)
     d = fog_storage.directories.select { |d| d.key == bucket_name }.first
 
@@ -112,4 +154,4 @@ class Zerigo < Thor
 
 end
 
-Zerigo.start
+Aws.start
