@@ -12,7 +12,7 @@ duout = `du -h -d 1`
 
 comps = []
 
-duout.each do |l|
+duout.split(/\n/).each do |l|
   l =~ /\s*(\d+(\.\d+)?)(\w)\s+(.*)$/
   size = $1
   unit = $3
