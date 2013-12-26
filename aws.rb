@@ -32,6 +32,10 @@ class Aws < Thor
       @compute ||= Fog::Compute.new(fog_opts)
     end
 
+    def fog_cdn
+      @cdn ||= Fog::CDN.new(fog_opts)
+    end
+
     def show_buckets
       fog_storage.directories.sort { |a,b| a.key <=> b.key }.each { |b| puts "#{b.key}" }
     end
@@ -41,6 +45,11 @@ class Aws < Thor
         puts "#{s.tags['Name']} (state: #{s.state}): id=#{s.id} keyname=#{s.key_name} dns=#{s.dns_name} flavor=#{s.flavor_id}"
       end
     end
+    
+    def show_cdns
+      puts fog_cdn.get_distribution_list.body['DistributionSummary'].to_yaml
+    end
+
   end
 
   desc "list_servers", "Show all servers"
@@ -71,12 +80,30 @@ class Aws < Thor
     end
   end
 
+  desc "list_cloudfront", "List cloudfront distributions (CDNs)"
+  def list_cloudfront
+    show_cdns
+  end
+
+  desc "create_cloudfront [BUCKET_NAME]", "Create a cloudfront distribution (a CDN)"
+  def create_cloudfront(bucket_id)
+    fog_cdn.post_distribution({
+                            'S3Origin' => {
+                              'DNSName' => "#{bucket_id}.s3.amazonaws.com"
+                            },
+                            'Enabled' => true
+                          })
+
+    show_cdns
+  end
+
   desc "list", "Show all buckets"
   def list
     show_buckets
   end
 
   desc "afew [BUCKET_NAME]", "Show first 5 files in bucket"
+  method_options :count => "5"
   def afew(bucket_name)
     d = fog_storage.directories.select { |d| d.key == bucket_name }.first
     if d.nil?
@@ -86,7 +113,7 @@ class Aws < Thor
 
     i = 0
     d.files.each do |s3_file|
-      break if i >= 5
+      break if i >= options[:count].to_i
       say("#{s3_file.key}")
       i += 1
     end
