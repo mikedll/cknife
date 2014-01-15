@@ -167,6 +167,7 @@ class Aws < Thor
   desc "upsync [BUCKET_NAME] [DIRECTORY]", "Push local files matching glob PATTERN into bucket. Ignore unchanged files."
   method_options :public => false
   method_options :region => "us-west-1"
+  method_options :noprompt => nil
   def upsync(bucket_name, directory)
     if !File.exists?(directory) || !File.directory?(directory)
       say("'#{directory} does not exist or is not a directory.")
@@ -185,7 +186,7 @@ class Aws < Thor
 
     sn = un = cn = 0
     with_bucket bucket_name do |d|
-      if yes?("Proceed?", :red)
+      if (options[:noprompt] == nil) && yes?("Proceed?", :red)
         files.each do |to_upload|
           k = fog_key_for(target_root, to_upload)
 
