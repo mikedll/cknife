@@ -50,6 +50,24 @@ class Aws < Thor
       puts fog_cdn.get_distribution_list.body['DistributionSummary'].to_yaml
     end
 
+    def with_bucket(bucket_name)
+      d = fog_storage.directories.select { |d| d.key == bucket_name }.first
+      if d.nil?
+        say ("Could not find bucket with name #{bucket_name}")
+        return
+      end
+
+      say ("Found bucket named #{bucket_name}")
+      yield d
+    end
+
+    def fog_key_for(target_root, file_path)
+      target_root_path_length ||= target_root.to_s.length + "/".length
+      relative = file_path[ target_root_path_length, file_path.length]
+      relative
+    end
+
+
   end
 
   desc "list_servers", "Show all servers"
@@ -118,26 +136,75 @@ class Aws < Thor
       i += 1
     end
   end
-
+  
   desc "download [BUCKET_NAME]", "Show files in  bucket"
   def download(bucket_name)
-    d = fog_storage.directories.select { |d| d.key == bucket_name }.first
-    if d.nil?
-      say ("Found no bucket by name #{bucket_name}")
+    with_bucket bucket_name do |d|
+      if yes?("Are you sure you want to download all files into the CWD?", :red)
+        d.files.each do |s3_file|
+          say ("Creating path for and downloading #{s3_file.key}")
+          dir_path = Pathname.new(s3_file.key).dirname
+          dir_path.mkpath
+          File.open(s3_file.key, "w") do |f|
+            f.write s3_file.body
+          end
+        end
+      else
+        say ("No action taken.")
+      end
+    end
+  end
+
+  desc "upsync [BUCKET_NAME] [DIRECTORY]", "Push local files matching glob PATTERN into bucket. Ignore unchanged files."
+  def upsync(bucket_name, directory)
+    if !File.exists?(directory) || !File.directory?(directory)
+      say("'#{directory} does not exist or is not a directory.")
       return
     end
 
-    if yes?("Found bucket. Are you sure you want to download all files into the CWD?", :red)
-      d.files.each do |s3_file|
-        say ("Creating path for and downloading #{s3_file.key}")
-        dir_path = Pathname.new(s3_file.key).dirname
-        dir_path.mkpath
-        File.open(s3_file.key, "w") do |f|
-          f.write s3_file.body
+    target_root = Pathname.new(directory)
+
+    files = Dir.glob(target_root.join("**", "*")).select { |f| !File.directory?(f) }.map(&:to_s)
+    if files.count == 0
+      say("No files to upload.")
+      return
+    end
+
+    say("Found #{files.count} files to upload.")
+    
+    with_bucket bucket_name do |d|
+      if yes?("Proceed?", :red)
+        files.each do |to_upload|
+          k = fog_key_for(target_root, to_upload)
+
+          puts "*************** #{__FILE__} #{__LINE__} *************"
+          puts "#{k}"
+
+          existing = d.files.get(k)
+          puts "*************** #{__FILE__} #{__LINE__} *************"
+          puts "#{existing.last_modified.class} class of last modified" if existing
+
+          if existing && existing.last_modified > File.mtime(to_upload)
+            puts "*************** #{__FILE__} #{__LINE__} *************"
+            puts "need to update"
+            existing.body = File.open(to_upload)
+            existing.save
+          elsif existing.nil?
+            puts "*************** #{__FILE__} #{__LINE__} *************"
+            puts "need to create"
+            file = d.files.create(
+                                  :key    => k,
+                                  :body   => File.open(to_upload),
+                                  :public => true
+                                  )
+          end
+
+          raise "help"
+
         end
+      else
+        say ("No action taken.")
       end
-    else
-      say ("No action taken.")
     end
   end
 
