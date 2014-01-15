@@ -123,7 +123,7 @@ class Aws < Thor
   end
 
   desc "list", "Show all buckets"
-  method_options :region => "us-west-1"
+  method_options :region => "us-east-1"
   def list
     show_buckets
   end
@@ -146,7 +146,7 @@ class Aws < Thor
   end
   
   desc "download [BUCKET_NAME]", "Show files in  bucket"
-  method_options :region => "us-west-1"
+  method_options :region => "us-east-1"
   def download(bucket_name)
     with_bucket bucket_name do |d|
       if yes?("Are you sure you want to download all files into the CWD?", :red)
@@ -166,7 +166,7 @@ class Aws < Thor
 
   desc "upsync [BUCKET_NAME] [DIRECTORY]", "Push local files matching glob PATTERN into bucket. Ignore unchanged files."
   method_options :public => false
-  method_options :region => "us-west-1"
+  method_options :region => "us-east-1"
   method_options :noprompt => nil
   def upsync(bucket_name, directory)
     if !File.exists?(directory) || !File.directory?(directory)
@@ -186,7 +186,16 @@ class Aws < Thor
 
     sn = un = cn = 0
     with_bucket bucket_name do |d|
-      if (options[:noprompt] == nil) && yes?("Proceed?", :red)
+
+      # having a brain fart and cant get this to simplify
+      go = false
+      if options[:noprompt] != nil
+        go = true
+      else
+        go = yes?("Proceed?", :red)
+      end
+
+      if go && 
         files.each do |to_upload|
           k = fog_key_for(target_root, to_upload)
 
@@ -217,7 +226,7 @@ class Aws < Thor
 
 
   desc "delete [BUCKET_NAME]", "Destroy a bucket"
-  method_options :region => "us-west-1"
+  method_options :region => "us-east-1"
   def delete(bucket_name)
     d = fog_storage.directories.select { |d| d.key == bucket_name }.first
 
@@ -242,7 +251,7 @@ class Aws < Thor
   end
 
   desc "create [BUCKET_NAME]", "Create a bucket"
-  method_options :region => "us-west-1"
+  method_options :region => "us-east-1"
   def create(bucket_name = nil)
     if !bucket_name
       puts "No bucket name given." 
@@ -259,7 +268,7 @@ class Aws < Thor
   end
 
   desc "show [BUCKET_NAME]", "Show info about bucket"
-  method_options :region => "us-west-1"
+  method_options :region => "us-east-1"
   def show(bucket_name = nil)
     if !bucket_name
       puts "No bucket name given." 
