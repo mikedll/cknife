@@ -176,7 +176,8 @@ class Aws < Thor
     end
 
     say("Found #{files.count} candidate file upload(s).")
-    
+
+    sn = un = cn = 0
     with_bucket bucket_name do |d|
       if yes?("Proceed?", :red)
         files.each do |to_upload|
@@ -186,13 +187,16 @@ class Aws < Thor
           if existing && existing.etag != content_hash(File.read(to_upload))
             existing.body = File.open(to_upload)
             existing.save
+            un += 1
           elsif existing.nil?
             file = d.files.create(
                                   :key    => k,
                                   :body   => File.open(to_upload),
                                   :public => true
                                   )
+            cn += 1
           else
+            sn += 1
             # skipped
           end
         end
@@ -200,6 +204,7 @@ class Aws < Thor
         say ("No action taken.")
       end
     end
+    say("Done. #{cn} created. #{un} updated. #{sn} skipped.")
   end
 
 
