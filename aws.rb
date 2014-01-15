@@ -161,6 +161,7 @@ class Aws < Thor
   end
 
   desc "upsync [BUCKET_NAME] [DIRECTORY]", "Push local files matching glob PATTERN into bucket. Ignore unchanged files."
+  method_options :public => false
   def upsync(bucket_name, directory)
     if !File.exists?(directory) || !File.directory?(directory)
       say("'#{directory} does not exist or is not a directory.")
@@ -192,7 +193,7 @@ class Aws < Thor
             file = d.files.create(
                                   :key    => k,
                                   :body   => File.open(to_upload),
-                                  :public => true
+                                  :public => options[:public]
                                   )
             cn += 1
           else
@@ -208,7 +209,7 @@ class Aws < Thor
   end
 
 
-  desc "delete [BUCKET_NAME]", "Show all buckets"
+  desc "delete [BUCKET_NAME]", "Destroy a bucket"
   def delete(bucket_name)
     d = fog_storage.directories.select { |d| d.key == bucket_name }.first
 
@@ -233,16 +234,33 @@ class Aws < Thor
   end
 
   desc "create [BUCKET_NAME]", "Create a bucket"
+  method_options :region => "us-west-1"
   def create(bucket_name = nil)
     if !bucket_name
       puts "No bucket name given." 
       return
     end
 
-    fog_storage.directories.create(:key => bucket_name)
+    fog_storage.directories.create(
+                                   :key => bucket_name,
+                                   :location => options[:region]
+                                   )
 
     puts "Created bucket #{bucket_name}."
     show_buckets
+  end
+
+  desc "show [BUCKET_NAME]", "Show info about bucket"
+  def show(bucket_name = nil)
+    if !bucket_name
+      puts "No bucket name given." 
+      return
+    end
+
+    with_bucket(bucket_name) do |d|
+      say "#{d}: "
+      say d.location
+    end
   end
 
 end
