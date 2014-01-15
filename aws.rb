@@ -206,6 +206,7 @@ class Aws < Thor
             # skipped
           end
         end
+        say("#{to_upload}")
       else
         say ("No action taken.")
       end
