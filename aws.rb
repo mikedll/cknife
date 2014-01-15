@@ -8,6 +8,8 @@ require 'bundler'
 Bundler.require
 
 require 'active_support/all'
+require 'zlib'
+require 'digest/md5'
 
 class Aws < Thor
 
@@ -67,6 +69,9 @@ class Aws < Thor
       relative
     end
 
+    def content_hash(s)
+      Digest::MD5.hexdigest(s)
+    end
 
   end
 
@@ -170,37 +175,26 @@ class Aws < Thor
       return
     end
 
-    say("Found #{files.count} files to upload.")
+    say("Found #{files.count} candidate file upload(s).")
     
     with_bucket bucket_name do |d|
       if yes?("Proceed?", :red)
         files.each do |to_upload|
           k = fog_key_for(target_root, to_upload)
 
-          puts "*************** #{__FILE__} #{__LINE__} *************"
-          puts "#{k}"
-
           existing = d.files.get(k)
-          puts "*************** #{__FILE__} #{__LINE__} *************"
-          puts "#{existing.last_modified.class} class of last modified" if existing
-
-          if existing && existing.last_modified > File.mtime(to_upload)
-            puts "*************** #{__FILE__} #{__LINE__} *************"
-            puts "need to update"
+          if existing && existing.etag != content_hash(File.read(to_upload))
             existing.body = File.open(to_upload)
             existing.save
           elsif existing.nil?
-            puts "*************** #{__FILE__} #{__LINE__} *************"
-            puts "need to create"
             file = d.files.create(
                                   :key    => k,
                                   :body   => File.open(to_upload),
                                   :public => true
                                   )
+          else
+            # skipped
           end
-
-          raise "help"
-
         end
       else
         say ("No action taken.")
