@@ -71,6 +71,15 @@ class Aws < Thor
       relative
     end
 
+    def s3_download(s3_file)
+      dir_path = Pathname.new(s3_file.key).dirname
+      dir_path.mkpath
+      File.open(s3_file.key, "w") do |f|
+        f.write s3_file.body
+      end      
+    end
+
+
     def content_hash(s)
       Digest::MD5.hexdigest(s)
     end
@@ -145,21 +154,27 @@ class Aws < Thor
     end
   end
   
-  desc "download [BUCKET_NAME]", "Show files in  bucket"
+  desc "download [BUCKET_NAME]", "Download all files in a bucket to CWD. Or one file."
   method_options :region => "us-east-1"
+  method_options :one => nil
   def download(bucket_name)
     with_bucket bucket_name do |d|
-      if yes?("Are you sure you want to download all files into the CWD?", :red)
-        d.files.each do |s3_file|
-          say ("Creating path for and downloading #{s3_file.key}")
-          dir_path = Pathname.new(s3_file.key).dirname
-          dir_path.mkpath
-          File.open(s3_file.key, "w") do |f|
-            f.write s3_file.body
+      if options[:one].nil?
+        if yes?("Are you sure you want to download all files into the CWD?", :red)
+          d.files.each do |s3_file|
+            say("Creating path for and downloading #{s3_file.key}")
+            s3_download(s3_file)
           end
+        else
+          say("No action taken.")
         end
       else
-        say ("No action taken.")
+        s3_file = d.files.get(options[:one])
+        if !s3_file.nil?
+          s3_download(s3_file)
+        else
+          say("Could not find #{options[:one]}. No action taken.")
+        end
       end
     end
   end
