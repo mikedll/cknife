@@ -183,6 +183,7 @@ class Aws < Thor
   method_options :public => false
   method_options :region => "us-east-1"
   method_options :noprompt => nil
+  method_options :glob => "**/*"
   def upsync(bucket_name, directory)
     if !File.exists?(directory) || !File.directory?(directory)
       say("'#{directory} does not exist or is not a directory.")
@@ -191,7 +192,7 @@ class Aws < Thor
 
     target_root = Pathname.new(directory)
 
-    files = Dir.glob(target_root.join("**", "*")).select { |f| !File.directory?(f) }.map(&:to_s)
+    files = Dir.glob(target_root.join(options[:glob])).select { |f| !File.directory?(f) }.map(&:to_s)
     if files.count == 0
       say("No files to upload.")
       return
