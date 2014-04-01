@@ -210,6 +210,9 @@ class Aws < Thor
   method_options :region => "us-east-1"
   method_options :noprompt => nil
   method_options :glob => "**/*"
+  method_options :days_retain => 30
+  method_options :months_retain => 3
+  method_options :weeks_retain => 5
   def upsync(bucket_name, directory)
     if !File.exists?(directory) || !File.directory?(directory)
       say("'#{directory} does not exist or is not a directory.")
@@ -226,7 +229,7 @@ class Aws < Thor
 
     say("Found #{files.count} candidate file upload(s).")
 
-    sn = un = cn = 0
+    dn = sn = un = cn = 0
     with_bucket bucket_name do |d|
 
       # having a brain fart and cant get this to simplify
