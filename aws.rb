@@ -13,6 +13,7 @@ require 'digest/md5'
 
 class Aws < Thor
 
+  FILE_BUFFER_SIZE = 40.megabytes
 
   no_tasks do
 
@@ -106,8 +107,14 @@ class Aws < Thor
     end
 
 
-    def content_hash(s)
-      Digest::MD5.hexdigest(s)
+    def content_hash(file)
+      md5 = Digest::MD5.new
+
+      while !file.eof?
+        md5.update(file.read(FILE_BUFFER_SIZE))        
+      end
+
+      md5.hexdigest
     end
 
   end
@@ -246,7 +253,7 @@ class Aws < Thor
           k = fog_key_for(target_root, to_upload)
 
           existing = d.files.get(k)
-          if existing && existing.etag != content_hash(File.read(to_upload))
+          if existing && existing.etag != content_hash(File.new(to_upload))
             existing.body = File.open(to_upload)
             existing.save
             say("updated.")
