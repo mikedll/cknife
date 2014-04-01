@@ -211,8 +211,8 @@ class Aws < Thor
   method_options :noprompt => nil
   method_options :glob => "**/*"
   method_options :days_retain => 30
-  method_options :months_retain => 3
-  method_options :weeks_retain => 5
+  # method_options :months_retain => 3
+  # method_options :weeks_retain => 5
   def upsync(bucket_name, directory)
     if !File.exists?(directory) || !File.directory?(directory)
       say("'#{directory} does not exist or is not a directory.")
@@ -240,14 +240,16 @@ class Aws < Thor
         go = yes?("Proceed?", :red)
       end
 
-      if go && 
+      if go
         files.each do |to_upload|
+          say("#{to_upload} (no output if skipped)...")
           k = fog_key_for(target_root, to_upload)
 
           existing = d.files.get(k)
           if existing && existing.etag != content_hash(File.read(to_upload))
             existing.body = File.open(to_upload)
             existing.save
+            say("updated.")
             un += 1
           elsif existing.nil?
             file = d.files.create(
@@ -255,18 +257,29 @@ class Aws < Thor
                                   :body   => File.open(to_upload),
                                   :public => options[:public]
                                   )
+            say("created.")
             cn += 1
           else
             sn += 1
             # skipped
           end
-          say("#{to_upload}")          
+        end        
+        
+        (Time.now - options[:days_retain].to_i.days).tap do |day_lbound|
+          d.files.each do |f|
+            if f.last_modified < day_lbound
+              f.destroy
+              say("Deleted #{f.key}.")
+              dn += 1
+            end
+          end          
         end
+        
       else
         say ("No action taken.")
       end
     end
-    say("Done. #{cn} created. #{un} updated. #{sn} skipped.")
+    say("Done. #{cn} created. #{un} updated. #{sn} skipped. #{dn} deleted. ")
   end
 
 
