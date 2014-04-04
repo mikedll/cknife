@@ -292,6 +292,34 @@ class Aws < Thor
           end
         end        
 
+        if options[:backups_retain]
+          backups_retain(bucket_name)
+        end
+      else
+        say ("No action taken.")
+      end
+    end
+    say("Done. #{cn} created. #{un} updated. #{sn} skipped. #{dn} deleted remotely. #{spn} retained remotely.")
+  end
+
+  desc "backups_retain [BUCKET_NAME]", "Apply a day/week/month backups retention program to all files in bucket."
+  method_options :noprompt => nil
+  method_options :region => "us-east-1"
+  method_options :days_retain => 30
+  method_options :months_retain => 3
+  method_options :weeks_retain => 5
+  def backups_retain(bucket_name)
+    spn = dn = sn = un = cn = 0
+    with_bucket bucket_name do |d|
+
+      go = false
+      if options[:noprompt] != nil
+        go = true
+      else
+        go = yes?("Proceed?", :red)
+      end
+
+      if go
         # inclusive lower bound, exclusive upper bound
         time_marks = []
         Time.now.beginning_of_day.tap do |start|
@@ -314,49 +342,43 @@ class Aws < Thor
         
         time_marks.sort!
 
-        if options[:backups_retain]
 
-          file_keys_modtimes = d.files.map { |f| 
-            md = d.files.get(f.key).metadata
-            {
-              :key => f.key,
-              :last_modified => md[LOCAL_MOD_KEY] ? Time.parse(md[LOCAL_MOD_KEY]) : f.last_modified
-            }
+        file_keys_modtimes = d.files.map { |f| 
+          md = d.files.get(f.key).metadata
+          {
+            :key => f.key,
+            :last_modified => md[LOCAL_MOD_KEY] ? Time.parse(md[LOCAL_MOD_KEY]) : f.last_modified
           }
+        }
 
-          # this generates as many 'kept files' as there are time marks...which seems wrong.
-          immediate_successors = {}
-          time_marks.each do |tm|
-            file_keys_modtimes.each do |fkm|
-              if fkm[:last_modified] >= tm && (immediate_successors[tm].nil? || fkm[:last_modified] < immediate_successors[tm][:last_modified])
-                immediate_successors[tm] = fkm
-              end
+        # this generates as many 'kept files' as there are time marks...which seems wrong.
+        immediate_successors = {}
+        time_marks.each do |tm|
+          file_keys_modtimes.each do |fkm|
+            if fkm[:last_modified] >= tm && (immediate_successors[tm].nil? || fkm[:last_modified] < immediate_successors[tm][:last_modified])
+              immediate_successors[tm] = fkm
             end
           end
+        end
 
-          immediate_successors.values.map { |v| v[:key] }.tap do |kept_keys|
-            d.files.each do |f|
-              file_key_modtime = file_keys_modtimes.select { |fkm| fkm[:key] == f.key }.first
-              if kept_keys.include?(f.key)
-                # say("Remote retained #{f.key}.")
-                say("Remote retained #{file_key_modtime[:last_modified]}.")
-                spn += 1
-              else
-                # f.destroy
-                # say("Remote deleted #{f.key}.")
-                say("Remote deleted #{file_key_modtime[:last_modified]}.")
-                dn += 1
-              end
-            end          
-          end
-        end        
-      else
-        say ("No action taken.")
+        immediate_successors.values.map { |v| v[:key] }.tap do |kept_keys|
+          d.files.each do |f|
+            file_key_modtime = file_keys_modtimes.select { |fkm| fkm[:key] == f.key }.first
+            if kept_keys.include?(f.key)
+              # say("Remote retained #{f.key}.")
+              say("Remote retained #{file_key_modtime[:last_modified]}.")
+              spn += 1
+            else
+              # f.destroy
+              # say("Remote deleted #{f.key}.")
+              say("Remote deleted #{file_key_modtime[:last_modified]}.")
+              dn += 1
+            end
+          end          
+        end
       end
     end
-    say("Done. #{cn} created. #{un} updated. #{sn} skipped. #{dn} deleted remotely. #{spn} retained remotely.")
   end
-
 
   desc "delete [BUCKET_NAME]", "Destroy a bucket"
   method_options :region => "us-east-1"
