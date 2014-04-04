@@ -93,7 +93,7 @@ directory - a set of photos, for example.
 
 
 ## Key and Secret Configuration
-2
+
 In order of priority, Setup your key and secret with:
 
   - $CWD/cknife.yml
