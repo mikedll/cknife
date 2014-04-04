@@ -360,8 +360,10 @@ class Aws < Thor
           end
         end
 
+
         if options[:backups_retain]
 
+          say("Fetching remote file metadata.")
           # This array of hashes is computed because we need to do
           # nested for loops of M*N complexity, where M=time_marks
           # and N=files.  We also need to do an remote get call to
@@ -370,6 +372,8 @@ class Aws < Thor
           # all the meta data for all the N files.
 
           file_keys_modtimes = d.files.map { |f| 
+            say(f.key)
+
             md = d.files.get(f.key).metadata
             {
               :key => f.key,
@@ -391,6 +395,9 @@ class Aws < Thor
             d.files.each do |f|
               # dont even bother considering a delete if this doesnt match the glob
               if File.fnmatch(options[:glob], f.key) 
+
+                say("Considering #{f.key}")
+
                 file_key_modtime = file_keys_modtimes.select { |fkm| fkm[:key] == f.key }.first
                 if kept_keys.include?(f.key)
                   say("Remote retained #{f.key}.")
