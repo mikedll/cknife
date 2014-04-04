@@ -343,12 +343,14 @@ class Aws < Thor
             un += 1            
           elsif existing.nil?
             if !options[:dry_run]
-              file = d.files.create(
-                                    :key    => k,
-                                    :metadata => { LOCAL_MOD_KEY => localfile.mtime.to_s },
-                                    :body   => localfile,
-                                    :public => options[:public]
-                                    )
+              File.open(to_upload) do |localfile|
+                file = d.files.create(
+                                      :key    => k,
+                                      :metadata => { LOCAL_MOD_KEY => localfile.mtime.to_s },
+                                      :body   => localfile,
+                                      :public => options[:public]
+                                      )
+              end
             end
             say("created.")
             cn += 1
