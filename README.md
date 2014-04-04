@@ -2,7 +2,10 @@ Cali Army Knife
 ==============
 
 An Amazon Web Services S3 command line tool, and a few other command
-line tools.
+line tools. Written in Ruby with Thor.
+
+[Github Link](https://github.com/mikedll/cali-army-knife)
+
 
 Examples:
 
