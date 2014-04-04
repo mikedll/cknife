@@ -244,8 +244,8 @@ class Aws < Thor
     target_root = Pathname.new(directory)
 
     files = Dir.glob(target_root.join(options[:glob])).select { |f| !File.directory?(f) }.map(&:to_s)
-    if files.count == 0
-      say("No files to upload.")
+    if !options[:backups_retain] && files.count == 0
+      say("No files to upload and no backups retain requested.")
       return
     end
 
