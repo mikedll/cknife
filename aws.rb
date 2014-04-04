@@ -288,9 +288,10 @@ class Aws < Thor
 
           time_marks.each do |tm|
             files.each do |to_upload|
-              localfile = File.new(to_upload)
-              if localfile.mtime >= tm && (immediate_successors[tm].nil? || localfile.mtime < immediate_successors[tm][:last_modified])
-                immediate_successors[tm] = { :local_path => to_upload, :last_modified => localfile.mtime }
+              File.open(to_upload) do |localfile|
+                if localfile.mtime >= tm && (immediate_successors[tm].nil? || localfile.mtime < immediate_successors[tm][:last_modified])
+                  immediate_successors[tm] = { :local_path => to_upload, :last_modified => localfile.mtime }
+                end
               end
             end
           end
@@ -312,16 +313,24 @@ class Aws < Thor
           say("#{to_upload} (no output if skipped)...")
           k = fog_key_for(target_root, to_upload)
 
-          localfile = File.new(to_upload)
           existing = d.files.get(k)
-          time_mismatch = !existing.nil? && (existing.metadata[LOCAL_MOD_KEY].nil? || (Time.parse(existing.metadata[LOCAL_MOD_KEY]) - localfile.mtime).abs > EPSILON)
-          if existing && time_mismatch && existing.etag != content_hash(localfile)
+
+          time_mismatch = false
+          content_hash_mistmatched = false
+          File.open(to_upload) do |localfile|
+            time_mismatch = !existing.nil? && (existing.metadata[LOCAL_MOD_KEY].nil? || (Time.parse(existing.metadata[LOCAL_MOD_KEY]) - localfile.mtime).abs > EPSILON)
+            if time_mismatch
+              content_hash_mistmatched = existing.etag != content_hash(localfile)
+            end
+          end
+
+          if existing && time_mismatch && content_hash_mistmatched
             if !options[:dry_run]
-              existing.metadata = { LOCAL_MOD_KEY => localfile.mtime.to_s }
-              f = File.open(to_upload)
-              existing.body = f
-              existing.save
-              f.close
+              File.open(to_upload) do |localfile|
+                existing.metadata = { LOCAL_MOD_KEY => localfile.mtime.to_s }
+                existing.body = localfile
+                existing.save
+              end
             end
             say("updated.")
             un += 1
