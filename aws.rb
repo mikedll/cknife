@@ -302,6 +302,9 @@ class Aws < Thor
             before_reject = files.count # blah...lame
             files.reject! { |to_upload| !kept_files.include?(to_upload) } 
             sn += before_reject - files.count 
+
+            say("Found #{files.count} file(s) that meet backups retention criteria for upload. Comparing against bucket...")
+
           end
         end
 
