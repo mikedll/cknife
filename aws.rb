@@ -311,7 +311,7 @@ class Aws < Thor
 
           localfile = File.new(to_upload)
           existing = d.files.get(k)
-          time_mismatch = (existing.metadata[LOCAL_MOD_KEY].nil? || (Time.parse(existing.metadata[LOCAL_MOD_KEY]) - localfile.mtime).abs > EPSILON)
+          time_mismatch = !existing.nil? && (existing.metadata[LOCAL_MOD_KEY].nil? || (Time.parse(existing.metadata[LOCAL_MOD_KEY]) - localfile.mtime).abs > EPSILON)
           if existing && time_mismatch && existing.etag != content_hash(localfile)
             if !options[:dry_run]
               existing.metadata = { LOCAL_MOD_KEY => localfile.mtime.to_s }
