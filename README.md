@@ -39,9 +39,6 @@ Examples:
 
 ## Synchronizing a local directory's files with an Amazon S3 Bucket
 
-Here is the help for the upsync program, which uses the backups_retain command if you tell it to.
-
-
     Usage:
       aws.rb upsync [BUCKET_NAME] [DIRECTORY]
 
@@ -62,7 +59,7 @@ Here is the help for the upsync program, which uses the backups_retain command i
       [--dry-run]            
 
 The glob allows you to determine whether you want to recursively
-upload an entire directory, or just the set of *.dat files,
+upload an entire directory, or just a set of *.dat or *.sql files,
 ignoring whatever else may be in the specified directory. This glob
 pattern is appended to the directory you specify.
 
