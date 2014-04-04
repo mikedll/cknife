@@ -233,6 +233,9 @@ class Aws < Thor
   method_options :weeks_retain => 5
   method_options :dry_run => false
   def upsync(bucket_name, directory)
+
+    say("This is a dry run.") if options[:dry_run]
+
     if !File.exists?(directory) || !File.directory?(directory)
       say("'#{directory} does not exist or is not a directory.")
       return

@@ -12,7 +12,10 @@ Examples:
     # upload and sync /tmp/*.sql into my-frog-app-backups
     # bucket. Treat the files as backup files, and keep one backup
     # file for each of the last 10 months, 10 weeks, and 30 days.    
-    > aws upsync my-frog-app-backups ./tmp --glob "*.sql" --noprompt --backups-retain true --months-retain 5 --weeks-retain 10 --day-retain 30
+    > aws upsync my-frog-app-backups ./tmp --glob "*.sql" --noprompt --backups-retain true --months-retain 5 --weeks-retain 10 --days-retain 30
+
+    # As above, but see we'll happen first with dry run.
+    > aws upsync my-frog-app-backups ./tmp --glob "*.sql" --noprompt --backups-retain true --months-retain 5 --weeks-retain 10 --days-retain 30 --dry-run
 
 # aws
 
@@ -35,7 +38,7 @@ Examples:
 
 Here is the help for the upsync program, which uses the backups_retain command if you tell it to.
 
-    > aws help upsync 
+
     Usage:
       aws.rb upsync [BUCKET_NAME] [DIRECTORY]
 
@@ -53,6 +56,7 @@ Here is the help for the upsync program, which uses the backups_retain command i
                              # Default: 3
       [--weeks-retain=N]     
                              # Default: 5
+      [--dry-run]            
 
 The glob allows you to determine whether you want to recursively
 upload an entire directory, or just the set of *.dat files,
