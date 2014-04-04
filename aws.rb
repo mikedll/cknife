@@ -387,14 +387,17 @@ class Aws < Thor
 
           immediate_successors.values.map { |v| v[:key] }.tap do |kept_keys|
             d.files.each do |f|
-              file_key_modtime = file_keys_modtimes.select { |fkm| fkm[:key] == f.key }.first
-              if kept_keys.include?(f.key)
-                say("Remote retained #{f.key}.")
-                spn += 1
-              else
-                f.destroy if !options[:dry_run]
-                say("Remote deleted #{f.key}.")
-                dn += 1
+              # dont even bother considering a delete if this doesnt match the glob
+              if File.fnmatch(options[:glob], f.key) 
+                file_key_modtime = file_keys_modtimes.select { |fkm| fkm[:key] == f.key }.first
+                if kept_keys.include?(f.key)
+                  say("Remote retained #{f.key}.")
+                  spn += 1
+                else
+                  f.destroy if !options[:dry_run]
+                  say("Remote deleted #{f.key}.")
+                  dn += 1
+                end
               end
             end          
           end
