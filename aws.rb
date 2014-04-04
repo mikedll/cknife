@@ -231,6 +231,7 @@ class Aws < Thor
   method_options :days_retain => 30
   method_options :months_retain => 3
   method_options :weeks_retain => 5
+  method_options :dry_run => false
   def upsync(bucket_name, directory)
     if !File.exists?(directory) || !File.directory?(directory)
       say("'#{directory} does not exist or is not a directory.")
@@ -309,25 +310,31 @@ class Aws < Thor
           existing = d.files.get(k)
           time_mismatch = (existing.metadata[LOCAL_MOD_KEY].nil? || (Time.parse(existing.metadata[LOCAL_MOD_KEY]) - localfile.mtime).abs > EPSILON)
           if existing && time_mismatch && existing.etag != content_hash(localfile)
-            existing.metadata = { LOCAL_MOD_KEY => localfile.mtime.to_s }
-            f = File.open(to_upload)
-            existing.body = f
-            existing.save
-            f.close
+            if !options[:dry_run]
+              existing.metadata = { LOCAL_MOD_KEY => localfile.mtime.to_s }
+              f = File.open(to_upload)
+              existing.body = f
+              existing.save
+              f.close
+            end
             say("updated.")
             un += 1
           elsif existing && time_mismatch
-            existing.metadata = { LOCAL_MOD_KEY => localfile.mtime.to_s }
-            existing.save
+            if !options[:dry_run]
+              existing.metadata = { LOCAL_MOD_KEY => localfile.mtime.to_s }
+              existing.save
+            end
             say("updated.")
             un += 1            
           elsif existing.nil?
-            file = d.files.create(
-                                  :key    => k,
-                                  :metadata => { LOCAL_MOD_KEY => localfile.mtime.to_s },
-                                  :body   => localfile,
-                                  :public => options[:public]
-                                  )
+            if !options[:dry_run]
+              file = d.files.create(
+                                    :key    => k,
+                                    :metadata => { LOCAL_MOD_KEY => localfile.mtime.to_s },
+                                    :body   => localfile,
+                                    :public => options[:public]
+                                    )
+            end
             say("created.")
             cn += 1
           else
@@ -370,7 +377,7 @@ class Aws < Thor
                 say("Remote retained #{f.key}.")
                 spn += 1
               else
-                # f.destroy
+                f.destroy if !options[:dry_run]
                 say("Remote deleted #{f.key}.")
                 dn += 1
               end
