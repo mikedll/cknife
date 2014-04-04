@@ -14,6 +14,8 @@ require 'digest/md5'
 class Aws < Thor
 
   FILE_BUFFER_SIZE = 40.megabytes
+  LOCAL_MOD_KEY = "x-amz-meta-mtime"
+  EPSILON = 1.second
 
   no_tasks do
 
@@ -220,14 +222,15 @@ class Aws < Thor
     end
   end
 
-  desc "upsync [BUCKET_NAME] [DIRECTORY]", "Push local files matching glob PATTERN into bucket. Ignore unchanged files."
+  desc "upsync [BUCKET_NAME] [DIRECTORY]", "Push local files matching glob PATTERN into bucket. Ignore unchanged files. Allows retention using last modified timestamp in S3 - (when the file finished uploading)."
   method_options :public => false
   method_options :region => "us-east-1"
   method_options :noprompt => nil
   method_options :glob => "**/*"
+  method_options :backups_retain => false
   method_options :days_retain => 30
-  # method_options :months_retain => 3
-  # method_options :weeks_retain => 5
+  method_options :months_retain => 3
+  method_options :weeks_retain => 5
   def upsync(bucket_name, directory)
     if !File.exists?(directory) || !File.directory?(directory)
       say("'#{directory} does not exist or is not a directory.")
@@ -244,7 +247,7 @@ class Aws < Thor
 
     say("Found #{files.count} candidate file upload(s).")
 
-    dn = sn = un = cn = 0
+    spn = dn = sn = un = cn = 0
     with_bucket bucket_name do |d|
 
       # having a brain fart and cant get this to simplify
@@ -260,16 +263,25 @@ class Aws < Thor
           say("#{to_upload} (no output if skipped)...")
           k = fog_key_for(target_root, to_upload)
 
+          localfile = File.new(to_upload)
           existing = d.files.get(k)
-          if existing && existing.etag != content_hash(File.new(to_upload))
+
+          if existing && existing.etag != content_hash(localfile)
+            existing.metadata = { LOCAL_MOD_KEY => localfile.mtime.to_s }
             existing.body = File.open(to_upload)
             existing.save
             say("updated.")
             un += 1
+          elsif existing && (existing.metadata[LOCAL_MOD_KEY].nil? || (Time.parse(existing.metadata[LOCAL_MOD_KEY]) - localfile.mtime).abs > EPSILON)
+            existing.metadata = { LOCAL_MOD_KEY => localfile.mtime.to_s }
+            existing.save
+            say("updated.")
+            un += 1            
           elsif existing.nil?
             file = d.files.create(
                                   :key    => k,
-                                  :body   => File.open(to_upload),
+                                  :metadata => { LOCAL_MOD_KEY => localfile.mtime.to_s },
+                                  :body   => localfile,
                                   :public => options[:public]
                                   )
             say("created.")
@@ -279,22 +291,70 @@ class Aws < Thor
             # skipped
           end
         end        
-        
-        (Time.now - options[:days_retain].to_i.days).tap do |day_lbound|
-          d.files.each do |f|
-            if f.last_modified < day_lbound
-              f.destroy
-              say("Deleted #{f.key}.")
-              dn += 1
-            end
-          end          
+
+        # inclusive lower bound, exclusive upper bound
+        time_marks = []
+        Time.now.beginning_of_day.tap do |start|
+          options[:days_retain].times do |i|
+            time_marks.push(start - i.days)
+          end
+        end
+
+        Time.now.beginning_of_week.tap do |start|
+          options[:weeks_retain].times do |i|
+            time_marks.push(start - i.weeks)
+          end
+        end
+
+        Time.now.beginning_of_month.tap do |start|
+          options[:months_retain].times do |i|
+            time_marks.push(start - i.months)
+          end
         end
         
+        time_marks.sort!
+
+        if options[:backups_retain]
+
+          file_keys_modtimes = d.files.map { |f| 
+            md = d.files.get(f.key).metadata
+            {
+              :key => f.key,
+              :last_modified => md[LOCAL_MOD_KEY] ? Time.parse(md[LOCAL_MOD_KEY]) : f.last_modified
+            }
+          }
+
+          # this generates as many 'kept files' as there are time marks...which seems wrong.
+          immediate_successors = {}
+          time_marks.each do |tm|
+            file_keys_modtimes.each do |fkm|
+              if fkm[:last_modified] >= tm && (immediate_successors[tm].nil? || fkm[:last_modified] < immediate_successors[tm][:last_modified])
+                immediate_successors[tm] = fkm
+              end
+            end
+          end
+
+          immediate_successors.values.map { |v| v[:key] }.tap do |kept_keys|
+            d.files.each do |f|
+              file_key_modtime = file_keys_modtimes.select { |fkm| fkm[:key] == f.key }.first
+              if kept_keys.include?(f.key)
+                # say("Remote retained #{f.key}.")
+                say("Remote retained #{file_key_modtime[:last_modified]}.")
+                spn += 1
+              else
+                # f.destroy
+                # say("Remote deleted #{f.key}.")
+                say("Remote deleted #{file_key_modtime[:last_modified]}.")
+                dn += 1
+              end
+            end          
+          end
+        end        
       else
         say ("No action taken.")
       end
     end
-    say("Done. #{cn} created. #{un} updated. #{sn} skipped. #{dn} deleted. ")
+    say("Done. #{cn} created. #{un} updated. #{sn} skipped. #{dn} deleted remotely. #{spn} retained remotely.")
   end
 
 
