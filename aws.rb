@@ -265,14 +265,14 @@ class Aws < Thor
 
           localfile = File.new(to_upload)
           existing = d.files.get(k)
-
-          if existing && existing.etag != content_hash(localfile)
+          time_mismatch = (existing.metadata[LOCAL_MOD_KEY].nil? || (Time.parse(existing.metadata[LOCAL_MOD_KEY]) - localfile.mtime).abs > EPSILON)
+          if existing && time_mismatch && existing.etag != content_hash(localfile)
             existing.metadata = { LOCAL_MOD_KEY => localfile.mtime.to_s }
             existing.body = File.open(to_upload)
             existing.save
             say("updated.")
             un += 1
-          elsif existing && (existing.metadata[LOCAL_MOD_KEY].nil? || (Time.parse(existing.metadata[LOCAL_MOD_KEY]) - localfile.mtime).abs > EPSILON)
+          elsif existing && time_mismatch
             existing.metadata = { LOCAL_MOD_KEY => localfile.mtime.to_s }
             existing.save
             say("updated.")
