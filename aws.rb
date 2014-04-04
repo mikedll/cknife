@@ -371,14 +371,16 @@ class Aws < Thor
           # will not do this). so, for performance sanity, we cache
           # all the meta data for all the N files.
 
-          file_keys_modtimes = d.files.map { |f| 
-            say(f.key)
-
-            md = d.files.get(f.key).metadata
-            {
-              :key => f.key,
-              :last_modified => md[LOCAL_MOD_KEY] ? Time.parse(md[LOCAL_MOD_KEY]) : f.last_modified
-            }
+          file_keys_modtimes = []
+          d.files.each { |f| 
+            if File.fnmatch(options[:glob], f.key) 
+              say(f.key)
+              md = d.files.get(f.key).metadata
+              file_keys_modtimes.push({
+                                        :key => f.key,
+                                        :last_modified => md[LOCAL_MOD_KEY] ? Time.parse(md[LOCAL_MOD_KEY]) : f.last_modified
+                                      })
+            end
           }
 
           # this generates as many 'kept files' as there are time marks...which seems wrong.
