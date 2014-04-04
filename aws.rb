@@ -56,7 +56,15 @@ class Aws < Thor
     end
 
     def fog_storage
-      @storage ||= Fog::Storage.new(fog_opts)
+      return @storage if @storage 
+      @storage = Fog::Storage.new(fog_opts)
+      begin
+        @storage.directories.count # test login
+      rescue Excon::Errors::Forbidden => e
+        say("Received Forbidden error while accessing account info. Is your key/secret correct?")
+        raise SystemExit
+      end
+      @storage
     end
 
     def fog_compute
