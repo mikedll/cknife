@@ -222,7 +222,7 @@ class Aws < Thor
     end
   end
 
-  desc "upsync [BUCKET_NAME] [DIRECTORY]", "Push local files matching glob PATTERN into bucket. Ignore unchanged files. Allows retention using last modified timestamp in S3 - (when the file finished uploading)."
+  desc "upsync [BUCKET_NAME] [DIRECTORY]", "Push local files matching glob PATTERN into bucket. Ignore unchanged files."
   method_options :public => false
   method_options :region => "us-east-1"
   method_options :noprompt => nil
@@ -259,6 +259,48 @@ class Aws < Thor
       end
 
       if go
+        time_marks = []
+        immediate_successors = {}
+        if options[:backups_retain]
+          # inclusive lower bound, exclusive upper bound
+          time_marks = []
+          Time.now.beginning_of_day.tap do |start|
+            options[:days_retain].times do |i|
+              time_marks.push(start - i.days)
+            end
+          end
+
+          Time.now.beginning_of_week.tap do |start|
+            options[:weeks_retain].times do |i|
+              time_marks.push(start - i.weeks)
+            end
+          end
+
+          Time.now.beginning_of_month.tap do |start|
+            options[:months_retain].times do |i|
+              time_marks.push(start - i.months)
+            end
+          end
+
+          time_marks.each do |tm|
+            files.each do |to_upload|
+              localfile = File.new(to_upload)
+              if localfile.mtime >= tm && (immediate_successors[tm].nil? || localfile.mtime < immediate_successors[tm][:last_modified])
+                immediate_successors[tm] = { :local_path => to_upload, :last_modified => localfile.mtime }
+              end
+            end
+          end
+        end
+
+        # don't pointlessly upload large files if we already know we're going to delete them!
+        if options[:backups_retain] 
+          immediate_successors.values.map { |h| h[:local_path] }.tap do |kept_files| 
+            before_reject = files.count # blah...lame
+            files.reject! { |to_upload| !kept_files.include?(to_upload) } 
+            sn += before_reject - files.count 
+          end
+        end
+
         files.each do |to_upload|
           say("#{to_upload} (no output if skipped)...")
           k = fog_key_for(target_root, to_upload)
@@ -268,8 +310,10 @@ class Aws < Thor
           time_mismatch = (existing.metadata[LOCAL_MOD_KEY].nil? || (Time.parse(existing.metadata[LOCAL_MOD_KEY]) - localfile.mtime).abs > EPSILON)
           if existing && time_mismatch && existing.etag != content_hash(localfile)
             existing.metadata = { LOCAL_MOD_KEY => localfile.mtime.to_s }
-            existing.body = File.open(to_upload)
+            f = File.open(to_upload)
+            existing.body = f
             existing.save
+            f.close
             say("updated.")
             un += 1
           elsif existing && time_mismatch
@@ -290,94 +334,54 @@ class Aws < Thor
             sn += 1
             # skipped
           end
-        end        
+        end
 
         if options[:backups_retain]
-          backups_retain(bucket_name)
+
+          # This array of hashes is computed because we need to do
+          # nested for loops of M*N complexity, where M=time_marks
+          # and N=files.  We also need to do an remote get call to
+          # fetch the metadata of all N remote files (d.files.each
+          # will not do this). so, for performance sanity, we cache
+          # all the meta data for all the N files.
+
+          file_keys_modtimes = d.files.map { |f| 
+            md = d.files.get(f.key).metadata
+            {
+              :key => f.key,
+              :last_modified => md[LOCAL_MOD_KEY] ? Time.parse(md[LOCAL_MOD_KEY]) : f.last_modified
+            }
+          }
+
+          # this generates as many 'kept files' as there are time marks...which seems wrong.
+          immediate_successors = {}
+          time_marks.each do |tm|
+            file_keys_modtimes.each do |fkm|
+              if fkm[:last_modified] >= tm && (immediate_successors[tm].nil? || fkm[:last_modified] < immediate_successors[tm][:last_modified])
+                immediate_successors[tm] = fkm
+              end
+            end
+          end
+
+          immediate_successors.values.map { |v| v[:key] }.tap do |kept_keys|
+            d.files.each do |f|
+              file_key_modtime = file_keys_modtimes.select { |fkm| fkm[:key] == f.key }.first
+              if kept_keys.include?(f.key)
+                say("Remote retained #{f.key}.")
+                spn += 1
+              else
+                # f.destroy
+                say("Remote deleted #{f.key}.")
+                dn += 1
+              end
+            end          
+          end
         end
       else
         say ("No action taken.")
       end
     end
-    say("Done. #{cn} created. #{un} updated. #{sn} skipped. #{dn} deleted remotely. #{spn} retained remotely.")
-  end
-
-  desc "backups_retain [BUCKET_NAME]", "Apply a day/week/month backups retention program to all files in bucket."
-  method_options :noprompt => nil
-  method_options :region => "us-east-1"
-  method_options :days_retain => 30
-  method_options :months_retain => 3
-  method_options :weeks_retain => 5
-  def backups_retain(bucket_name)
-    spn = dn = sn = un = cn = 0
-    with_bucket bucket_name do |d|
-
-      go = false
-      if options[:noprompt] != nil
-        go = true
-      else
-        go = yes?("Proceed?", :red)
-      end
-
-      if go
-        # inclusive lower bound, exclusive upper bound
-        time_marks = []
-        Time.now.beginning_of_day.tap do |start|
-          options[:days_retain].times do |i|
-            time_marks.push(start - i.days)
-          end
-        end
-
-        Time.now.beginning_of_week.tap do |start|
-          options[:weeks_retain].times do |i|
-            time_marks.push(start - i.weeks)
-          end
-        end
-
-        Time.now.beginning_of_month.tap do |start|
-          options[:months_retain].times do |i|
-            time_marks.push(start - i.months)
-          end
-        end
-        
-        time_marks.sort!
-
-
-        file_keys_modtimes = d.files.map { |f| 
-          md = d.files.get(f.key).metadata
-          {
-            :key => f.key,
-            :last_modified => md[LOCAL_MOD_KEY] ? Time.parse(md[LOCAL_MOD_KEY]) : f.last_modified
-          }
-        }
-
-        # this generates as many 'kept files' as there are time marks...which seems wrong.
-        immediate_successors = {}
-        time_marks.each do |tm|
-          file_keys_modtimes.each do |fkm|
-            if fkm[:last_modified] >= tm && (immediate_successors[tm].nil? || fkm[:last_modified] < immediate_successors[tm][:last_modified])
-              immediate_successors[tm] = fkm
-            end
-          end
-        end
-
-        immediate_successors.values.map { |v| v[:key] }.tap do |kept_keys|
-          d.files.each do |f|
-            file_key_modtime = file_keys_modtimes.select { |fkm| fkm[:key] == f.key }.first
-            if kept_keys.include?(f.key)
-              # say("Remote retained #{f.key}.")
-              say("Remote retained #{file_key_modtime[:last_modified]}.")
-              spn += 1
-            else
-              # f.destroy
-              # say("Remote deleted #{f.key}.")
-              say("Remote deleted #{file_key_modtime[:last_modified]}.")
-              dn += 1
-            end
-          end          
-        end
-      end
-    end
+    say("Done. #{cn} created. #{un} updated. #{sn} local skipped. #{dn} deleted remotely. #{spn} retained remotely.")
   end
 
   desc "delete [BUCKET_NAME]", "Destroy a bucket"
