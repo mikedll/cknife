@@ -8,18 +8,29 @@ all of its S3 operations.
 Uses multipart uploads with a chunksize of 10 megabytes to keep RAM
 usage down.
 
+The premier feature of the tool is the "upsync" command, which can be
+used to run a backups schedule with multiple classes of files
+(partitioned by a glob pattern). **It is your responsibility to
+generate one uniquely-named backup file per day**, as this tool does
+not do that part for you).
+
 [Github Link](https://github.com/mikedll/cali-army-knife)
 
 
 Examples:
 
-    # download my-photos buckest
+    # download entire my-photos bucke to CWD
     > aws download my-photos 
     
     # upload and sync /tmp/*.sql into my-frog-app-backups
     # bucket. Treat the files as backup files, and keep one backup
     # file for each of the last 10 months, 10 weeks, and 30 days.    
     > aws upsync my-frog-app-backups ./tmp --glob "*.sql" --noprompt --backups-retain true --months-retain 5 --weeks-retain 10 --days-retain 30
+
+    # as above, but now do redis backup files (./tmp/*.rdb). these will not produce
+    # namespace collisions with the sql files, and thus the same bucket
+    # can be used to store backups for both.    
+    > aws upsync my-frog-app-backups ./tmp --glob "*.rdb" --noprompt --backups-retain true --months-retain 5 --weeks-retain 10 --days-retain 30
 
     # As above, but see we'll happen first with dry run.
     > aws upsync my-frog-app-backups ./tmp --glob "*.sql" --noprompt --backups-retain true --months-retain 5 --weeks-retain 10 --days-retain 30 --dry-run
