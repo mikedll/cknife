@@ -16,24 +16,29 @@ not do that part for you).
 
 [Github Link](https://github.com/mikedll/cali-army-knife)
 
-
 Examples:
 
     # download entire my-photos bucke to CWD
-    > aws download my-photos 
+    > aws.rb download my-photos 
     
     # upload and sync /tmp/*.sql into my-frog-app-backups
     # bucket. Treat the files as backup files, and keep one backup
     # file for each of the last 10 months, 10 weeks, and 30 days.    
-    > aws upsync my-frog-app-backups ./tmp --glob "*.sql" --noprompt --backups-retain true --months-retain 5 --weeks-retain 10 --days-retain 30
+    > aws.rb upsync my-frog-app-backups ./tmp --glob "*.sql" --noprompt --backups-retain true --months-retain 5 --weeks-retain 10 --days-retain 30
 
     # as above, but now do redis backup files (./tmp/*.rdb). these will not produce
     # namespace collisions with the sql files, and thus the same bucket
     # can be used to store backups for both.    
-    > aws upsync my-frog-app-backups ./tmp --glob "*.rdb" --noprompt --backups-retain true --months-retain 5 --weeks-retain 10 --days-retain 30
+    > aws.rb upsync my-frog-app-backups ./tmp --glob "*.rdb" --noprompt --backups-retain true --months-retain 5 --weeks-retain 10 --days-retain 30
 
     # As above, but see we'll happen first with dry run.
-    > aws upsync my-frog-app-backups ./tmp --glob "*.sql" --noprompt --backups-retain true --months-retain 5 --weeks-retain 10 --days-retain 30 --dry-run
+    > aws.rb upsync my-frog-app-backups ./tmp --glob "*.sql" --noprompt --backups-retain true --months-retain 5 --weeks-retain 10 --days-retain 30 --dry-run
+
+# Getting Started / Installation
+
+  Clone this repo, `bundle` the Gemfile, and make the aws.rb invokable
+  either by adding it to your PATH or making a bash alias to it, using
+  an absolute path to it, or something. I dunno, I'm working on that.
 
 # aws
 
@@ -95,7 +100,7 @@ comparable to the file's local mod time.
 Sometimes you want to download an entire S3 bucket to your local
 directory - a set of photos, for example.
 
-    > aws help download 
+    > aws.rb help download 
     Usage:
       aws.rb download [BUCKET_NAME]
 
