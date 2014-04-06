@@ -12,7 +12,7 @@ The premier feature of the tool is the "upsync" command, which can be
 used to run a backups schedule with multiple classes of files
 (partitioned by a glob pattern). **It is your responsibility to
 generate one uniquely-named backup file per day**, as this tool does
-not do that part for you).
+not do that part for you.
 
 If you *don't* use the `backups-retain` option, then its like a very
 weak **rsync** that can upload from a local filesystem into a bucket.
@@ -27,7 +27,7 @@ Examples:
     
     # upload and sync /tmp/*.sql into my-frog-app-backups
     # bucket. Treat the files as backup files, and keep one backup
-    # file for each of the last 10 months, 10 weeks, and 30 days.    
+    # file for each of the last 5 months, 10 weeks, and 30 days.    
     > aws.rb upsync my-frog-app-backups ./tmp --glob "*.sql" --noprompt --backups-retain true --months-retain 5 --weeks-retain 10 --days-retain 30
 
     # as above, but now do redis backup files (./tmp/*.rdb). these will not produce
@@ -41,7 +41,7 @@ Examples:
     > aws.rb upsync my-frog-app-backups ./tmp --glob "*" --noprompt --backups-retain true --months-retain 5 --weeks-retain 10 --days-retain 30
 
     # Dry run mode. Try one of the prior backups retain commands, but
-    # see we'll happen first.
+    # let's see what will happen, first.
     > aws.rb upsync my-frog-app-backups ./tmp --glob "*.sql" --noprompt --backups-retain true --months-retain 5 --weeks-retain 10 --days-retain 30 --dry-run
 
 
