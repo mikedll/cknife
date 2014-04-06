@@ -182,6 +182,7 @@ class Aws < Thor
 
   desc "afew [BUCKET_NAME]", "Show first 5 files in bucket"
   method_options :count => "5"
+  method_options :glob => "**/*"
   def afew(bucket_name)
     d = fog_storage.directories.select { |d| d.key == bucket_name }.first
     if d.nil?
@@ -189,12 +190,38 @@ class Aws < Thor
       return
     end
 
+    found = []
+
     i = 0
-    d.files.each do |s3_file|
-      break if i >= options[:count].to_i
-      say("#{s3_file.key}")
-      i += 1
+    d.files.each do |f|
+      if File.fnmatch(options[:glob], f.key)
+        found.push(d.files.head(f.key))
+        break if i >= options[:count].to_i
+        i += 1
+      end
     end
+
+    unit_to_mult = {
+      'B' => 1,
+      'K' => 2**10,
+      'M' => 2**20,
+      'G' => 2**30
+    }
+
+    found.map { |f|
+      matching = unit_to_mult.keys.select { |k| 
+        f.content_length >= unit_to_mult[k]
+      }.last
+
+      [f.key,
+       "#{(f.content_length.to_f / unit_to_mult[matching]).round(2)}#{matching}",
+       f.content_type,
+       f.last_modified
+      ] 
+    }.tap do |tabular|
+      print_table(tabular, :ident => 2)
+    end
+
   end
   
   desc "download [BUCKET_NAME]", "Download all files in a bucket to CWD. Or one file."
