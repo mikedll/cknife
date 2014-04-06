@@ -14,6 +14,10 @@ used to run a backups schedule with multiple classes of files
 generate one uniquely-named backup file per day**, as this tool does
 not do that part for you).
 
+If you *don't* use the `backups-retain` option, then its like a very
+weak **rsync** that can upload from a local filesystem into a bucket.
+Which is also pretty useful.
+
 [Github Link](https://github.com/mikedll/cali-army-knife)
 
 Examples:
@@ -32,7 +36,12 @@ Examples:
     > aws.rb upsync my-frog-app-backups ./tmp --glob "*.rdb" --noprompt --backups-retain true --months-retain 5 --weeks-retain 10 --days-retain 30
 
     # As above, but see we'll happen first with dry run.
-    > aws.rb upsync my-frog-app-backups ./tmp --glob "*.sql" --noprompt --backups-retain true --months-retain 5 --weeks-retain 10 --days-retain 30 --dry-run
+    > aws.rb upsync my-frog-app-backups ./tmp --glob "*.sql" --noprompt --backups-retain true --months-retain 5 --weeks-retain 10 --days-retain 30
+
+    # DO NOT DO THIS INSTEAD OF THE ABOVE 2 COMMANDS, THINKING IT WILL
+    # TREAT .SQL AND .RDB FILES SEPARATELY. INSTEAD, YOU WILL LOSE
+    # SOME OF YOUR BACKUP FILES.    
+    > aws.rb upsync my-frog-app-backups ./tmp --glob "*" --noprompt --backups-retain true --months-retain 5 --weeks-retain 10 --days-retain 30
 
 # Getting Started / Installation
 
