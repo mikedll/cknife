@@ -13,7 +13,7 @@ require 'digest/md5'
 
 class Aws < Thor
 
-  FILE_BUFFER_SIZE = 40.megabytes
+  FILE_BUFFER_SIZE = 10.megabytes
   LOCAL_MOD_KEY = "x-amz-meta-mtime"
   EPSILON = 1.second
 
@@ -313,43 +313,49 @@ class Aws < Thor
           say("#{to_upload} (no output if skipped)...")
           k = fog_key_for(target_root, to_upload)
 
-          existing = d.files.get(k)
+          existing_head = d.files.head(k)
 
           time_mismatch = false
           content_hash_mistmatched = false
           File.open(to_upload) do |localfile|
-            time_mismatch = !existing.nil? && (existing.metadata[LOCAL_MOD_KEY].nil? || (Time.parse(existing.metadata[LOCAL_MOD_KEY]) - localfile.mtime).abs > EPSILON)
+            time_mismatch = !existing_head.nil? && (existing_head.metadata[LOCAL_MOD_KEY].nil? || (Time.parse(existing_head.metadata[LOCAL_MOD_KEY]) - localfile.mtime).abs > EPSILON)
             if time_mismatch
-              content_hash_mistmatched = existing.etag != content_hash(localfile)
+              content_hash_mistmatched = existing_head.etag != content_hash(localfile)
             end
           end
 
-          if existing && time_mismatch && content_hash_mistmatched
+          if existing_head && time_mismatch && content_hash_mistmatched
             if !options[:dry_run]
               File.open(to_upload) do |localfile|
-                existing.metadata = { LOCAL_MOD_KEY => localfile.mtime.to_s }
-                existing.body = localfile
-                existing.save
+                existing_head.metadata = { LOCAL_MOD_KEY => localfile.mtime.to_s }
+                existing_head.body = localfile
+                existing_head.multipart_chunk_size = FILE_BUFFER_SIZE # creates multipart_save
+                existing_head.save
               end
             end
             say("updated.")
             un += 1
-          elsif existing && time_mismatch
+          elsif existing_head && time_mismatch
             if !options[:dry_run]
-              existing.metadata = { LOCAL_MOD_KEY => localfile.mtime.to_s }
-              existing.save
+              File.open(to_upload) do |localfile|
+                existing_head.metadata = { LOCAL_MOD_KEY => localfile.mtime.to_s }
+                existing_head.save
+              end
             end
             say("updated.")
             un += 1            
-          elsif existing.nil?
+          elsif existing_head.nil?
             if !options[:dry_run]
               File.open(to_upload) do |localfile|
                 file = d.files.create(
                                       :key    => k,
-                                      :metadata => { LOCAL_MOD_KEY => localfile.mtime.to_s },
-                                      :body   => localfile,
-                                      :public => options[:public]
+                                      :public => options[:public],
+                                      :body => ""
                                       )
+                file.metadata = { LOCAL_MOD_KEY => localfile.mtime.to_s }
+                file.multipart_chunk_size = FILE_BUFFER_SIZE # creates multipart_save
+                file.body = localfile
+                file.save
               end
             end
             say("created.")
@@ -363,7 +369,6 @@ class Aws < Thor
 
         if options[:backups_retain]
 
-          say("Fetching remote file metadata.")
           # This array of hashes is computed because we need to do
           # nested for loops of M*N complexity, where M=time_marks
           # and N=files.  We also need to do an remote get call to
@@ -374,14 +379,17 @@ class Aws < Thor
           file_keys_modtimes = []
           d.files.each { |f| 
             if File.fnmatch(options[:glob], f.key) 
-              say(f.key)
-              md = d.files.get(f.key).metadata
+              existing_head = d.files.head(f.key)
+              md = existing_head.metadata
               file_keys_modtimes.push({
                                         :key => f.key,
-                                        :last_modified => md[LOCAL_MOD_KEY] ? Time.parse(md[LOCAL_MOD_KEY]) : f.last_modified
+                                        :last_modified => md[LOCAL_MOD_KEY] ? Time.parse(md[LOCAL_MOD_KEY]) : f.last_modified,
+                                        :existing_head => existing_head
                                       })
             end
           }
+
+          say("#{file_keys_modtimes.length} file(s) found to consider for remote retention or remote deletion.")
 
           # this generates as many 'kept files' as there are time marks...which seems wrong.
           immediate_successors = {}
@@ -394,23 +402,16 @@ class Aws < Thor
           end
 
           immediate_successors.values.map { |v| v[:key] }.tap do |kept_keys|
-            d.files.each do |f|
-              # dont even bother considering a delete if this doesnt match the glob
-              if File.fnmatch(options[:glob], f.key) 
-
-                say("Considering #{f.key}")
-
-                file_key_modtime = file_keys_modtimes.select { |fkm| fkm[:key] == f.key }.first
-                if kept_keys.include?(f.key)
-                  say("Remote retained #{f.key}.")
-                  spn += 1
-                else
-                  f.destroy if !options[:dry_run]
-                  say("Remote deleted #{f.key}.")
-                  dn += 1
-                end
+            file_keys_modtimes.each do |fkm|
+              if kept_keys.include?(fkm[:key])
+                say("Remote retained #{fkm[:key]}.")
+                spn += 1
+              else
+                fkm[:existing_head].destroy if !options[:dry_run]
+                say("Remote deleted #{fkm[:key]}.")
+                dn += 1
               end
-            end          
+            end
           end
         end
       else
