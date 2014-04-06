@@ -2,7 +2,11 @@ Cali Army Knife
 ==============
 
 An Amazon Web Services S3 command line tool, and a few other command
-line tools. Written in Ruby with Thor.
+line tools. Written in Ruby with Thor. It depends on the Fog gem for
+all of its S3 operations.
+
+Uses multipart uploads with a chunksize of 10 megabytes to keep RAM
+usage down.
 
 [Github Link](https://github.com/mikedll/cali-army-knife)
 
