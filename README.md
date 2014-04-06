@@ -35,13 +35,15 @@ Examples:
     # can be used to store backups for both.    
     > aws.rb upsync my-frog-app-backups ./tmp --glob "*.rdb" --noprompt --backups-retain true --months-retain 5 --weeks-retain 10 --days-retain 30
 
-    # As above, but see we'll happen first with dry run.
-    > aws.rb upsync my-frog-app-backups ./tmp --glob "*.sql" --noprompt --backups-retain true --months-retain 5 --weeks-retain 10 --days-retain 30
-
     # DO NOT DO THIS INSTEAD OF THE ABOVE 2 COMMANDS, THINKING IT WILL
     # TREAT .SQL AND .RDB FILES SEPARATELY. INSTEAD, YOU WILL LOSE
     # SOME OF YOUR BACKUP FILES.    
     > aws.rb upsync my-frog-app-backups ./tmp --glob "*" --noprompt --backups-retain true --months-retain 5 --weeks-retain 10 --days-retain 30
+
+    # Dry run mode. Try one of the prior backups retain commands, but
+    # see we'll happen first.
+    > aws.rb upsync my-frog-app-backups ./tmp --glob "*.sql" --noprompt --backups-retain true --months-retain 5 --weeks-retain 10 --days-retain 30 --dry-run
+
 
 # Getting Started / Installation
 
