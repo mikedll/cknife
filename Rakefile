@@ -17,19 +17,13 @@ Jeweler::Tasks.new do |gem|
   gem.name = "cknife"
   gem.homepage = "http://github.com/mikedll/cknife"
   gem.license = "MIT"
-  gem.summary = %Q{TODO: one-line summary of your gem}
-  gem.description = %Q{TODO: longer description of your gem}
+  gem.summary = "Cali Army Knife"
+  gem.description = "An Amazon Web Services S3 command line tool, and a few other command line tools."
   gem.email = "mikedll@mikedll.com"
   gem.authors = ["Mike De La Loza"]
   # dependencies defined in Gemfile
 end
 Jeweler::RubygemsDotOrgTasks.new
-
-desc "Code coverage detail"
-task :simplecov do
-  ENV['COVERAGE'] = "true"
-  Rake::Task['test'].execute
-end
 
 task :default => :spec
 
