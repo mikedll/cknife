@@ -8,6 +8,22 @@ Ruby 1.9.2 is required.
     gem install cknife
     cknifeaws help
 
+## AWS Key and Secret Configuration
+
+In order of priority, Setup your key and secret with:
+
+  - $CWD/cknife.yml
+  - $CWD/tmp/cknife.yml
+  - environment variables: `KEY`, `SECRET`
+  - environment variablse: `AMAZON_ACCESS_KEY_ID`, `AMAZON_SECRET_ACCESS_KEY` 
+
+The format of your cknife.yml must be like so:
+
+    ---
+    key: AKIAblahblahb...
+    secret: 8xILhOsecretsecretsecretsecret...
+
+
 # Overview
 
 An Amazon Web Services S3 command line tool, and a few other command
@@ -123,22 +139,6 @@ directory - a set of photos, for example.
       [--one=ONE]        
 
     Download all files in a bucket to CWD. Or one file.
-
-
-## Key and Secret Configuration
-
-In order of priority, Setup your key and secret with:
-
-  - $CWD/cknife.yml
-  - $CWD/tmp/cknife.yml
-  - environment variables: `KEY`, `SECRET`
-  - environment variablse: `AMAZON_ACCESS_KEY_ID`, `AMAZON_SECRET_ACCESS_KEY` 
-
-The format of your cknife.yml must be like so:
-
-    ---
-    key: AKIAblahblahb...
-    secret: 8xILhOsecretsecretsecretsecret...
 
 
 # zerigo 
