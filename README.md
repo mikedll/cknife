@@ -1,16 +1,18 @@
 Cali Army Knife
 ==============
 
-An Amazon Web Services S3 command line tool, and a few other command
-line tools. Written in Ruby with Thor. It depends on the Fog gem for
-all of its S3 operations.
+# Installation
 
-# Quick start
+Ruby 1.9.2 is required.
 
     gem install cknife
     cknifeaws help
 
 # Overview
+
+An Amazon Web Services S3 command line tool, and a few other command
+line tools, packaged as a Ruby gem. Written in Ruby with Thor. It
+depends on the Fog gem for all of its S3 operations.
 
 Uses multipart uploads with a chunksize of 10 megabytes to keep RAM
 usage down.
@@ -145,7 +147,7 @@ These tasks can be used to manage your DNS via Zerigo.  They changed
 their rates drastically with little notice in January of 2014, so I
 switched to DNS Simple and don't use this much anymore.
 
-    > zerigo 
+    > cknifezerigo 
     Tasks:
       cknifezerigo create [HOST_NAME]  # Create a host
       cknifezerigo delete [ID]         # Delete an entry by id
