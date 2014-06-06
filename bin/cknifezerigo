@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 
+require 'rest-client'
+require 'thor'
 require 'active_support/all'
 
 class Zerigo < Thor

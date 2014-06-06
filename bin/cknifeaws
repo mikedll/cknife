@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 
+require 'fog'
+require 'thor'
 require 'active_support/all'
 require 'zlib'
 require 'digest/md5'
