@@ -15,7 +15,7 @@ require 'jeweler'
 Jeweler::Tasks.new do |gem|
   # gem is a Gem::Specification... see http://guides.rubygems.org/specification-reference/ for more options
   gem.name = "cknife"
-  gem.homepage = "http://github.com/mikedll/cknife"
+  gem.homepage = "http://github.com/mikedll/cali-army-knife"
   gem.license = "MIT"
   gem.summary = "Cali Army Knife"
   gem.description = "An Amazon Web Services S3 command line tool, and a few other command line tools."

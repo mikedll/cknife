@@ -5,6 +5,13 @@ An Amazon Web Services S3 command line tool, and a few other command
 line tools. Written in Ruby with Thor. It depends on the Fog gem for
 all of its S3 operations.
 
+# Quick start
+
+    gem install cknife
+    cknifeaws help
+
+# Overview
+
 Uses multipart uploads with a chunksize of 10 megabytes to keep RAM
 usage down.
 
@@ -23,55 +30,48 @@ Which is also pretty useful.
 Examples:
 
     # download entire my-photos bucke to CWD
-    > aws.rb download my-photos 
+    > cknifeaws download my-photos 
     
     # upload and sync /tmp/*.sql into my-frog-app-backups
     # bucket. Treat the files as backup files, and keep one backup
     # file for each of the last 5 months, 10 weeks, and 30 days.    
-    > aws.rb upsync my-frog-app-backups ./tmp --glob "*.sql" --noprompt --backups-retain true --months-retain 5 --weeks-retain 10 --days-retain 30
+    > cknifeaws upsync my-frog-app-backups ./tmp --glob "*.sql" --noprompt --backups-retain true --months-retain 5 --weeks-retain 10 --days-retain 30
 
     # as above, but now do redis backup files (./tmp/*.rdb). these will not produce
     # namespace collisions with the sql files, and thus the same bucket
     # can be used to store backups for both.    
-    > aws.rb upsync my-frog-app-backups ./tmp --glob "*.rdb" --noprompt --backups-retain true --months-retain 5 --weeks-retain 10 --days-retain 30
+    > cknifeaws upsync my-frog-app-backups ./tmp --glob "*.rdb" --noprompt --backups-retain true --months-retain 5 --weeks-retain 10 --days-retain 30
 
     # DO NOT DO THIS INSTEAD OF THE ABOVE 2 COMMANDS, THINKING IT WILL
     # TREAT .SQL AND .RDB FILES SEPARATELY. INSTEAD, YOU WILL LOSE
     # SOME OF YOUR BACKUP FILES.    
-    > aws.rb upsync my-frog-app-backups ./tmp --glob "*" --noprompt --backups-retain true --months-retain 5 --weeks-retain 10 --days-retain 30
+    > cknifeaws upsync my-frog-app-backups ./tmp --glob "*" --noprompt --backups-retain true --months-retain 5 --weeks-retain 10 --days-retain 30
 
     # Dry run mode. Try one of the prior backups retain commands, but
     # let's see what will happen, first.
-    > aws.rb upsync my-frog-app-backups ./tmp --glob "*.sql" --noprompt --backups-retain true --months-retain 5 --weeks-retain 10 --days-retain 30 --dry-run
-
-
-# Getting Started / Installation
-
-  Clone this repo, `bundle` the Gemfile, and make the aws.rb invokable
-  either by adding it to your PATH or making a bash alias to it, using
-  an absolute path to it, or something. I dunno, I'm working on that.
+    > cknifeaws upsync my-frog-app-backups ./tmp --glob "*.sql" --noprompt --backups-retain true --months-retain 5 --weeks-retain 10 --days-retain 30 --dry-run
 
 # aws
 
     Tasks:
-      aws.rb afew [BUCKET_NAME]                # Show first 5 files in bucket
-      aws.rb create [BUCKET_NAME]              # Create a bucket
-      aws.rb create_cloudfront [BUCKET_NAME]   # Create a cloudfront distribution (a CDN)
-      aws.rb delete [BUCKET_NAME]              # Destroy a bucket
-      aws.rb download [BUCKET_NAME]            # Download all files in a bucket to CWD. Or one file.
-      aws.rb help [TASK]                       # Describe available tasks or one specific task
-      aws.rb list                              # Show all buckets
-      aws.rb list_cloudfront                   # List cloudfront distributions (CDNs)
-      aws.rb list_servers                      # Show all servers
-      aws.rb show [BUCKET_NAME]                # Show info about bucket
-      aws.rb start_server [SERVER_ID]          # Start a given EC2 server
-      aws.rb stop_server [SERVER_ID]           # Stop a given EC2 server (does not terminate it)
-      aws.rb upsync [BUCKET_NAME] [DIRECTORY]  # Push local files matching glob PATTERN into bucket. Ignore unchanged files.      
+      cknifeaws afew [BUCKET_NAME]                # Show first 5 files in bucket
+      cknifeaws create [BUCKET_NAME]              # Create a bucket
+      cknifeaws create_cloudfront [BUCKET_NAME]   # Create a cloudfront distribution (a CDN)
+      cknifeaws delete [BUCKET_NAME]              # Destroy a bucket
+      cknifeaws download [BUCKET_NAME]            # Download all files in a bucket to CWD. Or one file.
+      cknifeaws help [TASK]                       # Describe available tasks or one specific task
+      cknifeaws list                              # Show all buckets
+      cknifeaws list_cloudfront                   # List cloudfront distributions (CDNs)
+      cknifeaws list_servers                      # Show all servers
+      cknifeaws show [BUCKET_NAME]                # Show info about bucket
+      cknifeaws start_server [SERVER_ID]          # Start a given EC2 server
+      cknifeaws stop_server [SERVER_ID]           # Stop a given EC2 server (does not terminate it)
+      cknifeaws upsync [BUCKET_NAME] [DIRECTORY]  # Push local files matching glob PATTERN into bucket. Ignore unchanged files.      
 
 ## Synchronizing a local directory's files with an Amazon S3 Bucket
 
     Usage:
-      aws.rb upsync [BUCKET_NAME] [DIRECTORY]
+      cknifeaws upsync [BUCKET_NAME] [DIRECTORY]
 
     Options:
       [--public]             
@@ -111,9 +111,9 @@ comparable to the file's local mod time.
 Sometimes you want to download an entire S3 bucket to your local
 directory - a set of photos, for example.
 
-    > aws.rb help download 
+    > cknifeaws help download 
     Usage:
-      aws.rb download [BUCKET_NAME]
+      cknifeaws download [BUCKET_NAME]
 
     Options:
       [--region=REGION]  
@@ -147,17 +147,17 @@ switched to DNS Simple and don't use this much anymore.
 
     > zerigo 
     Tasks:
-      zerigo.rb create [HOST_NAME]  # Create a host
-      zerigo.rb delete [ID]         # Delete an entry by id
-      zerigo.rb help [TASK]         # Describe available tasks or one specific task
-      zerigo.rb list                # List available host names.
+      cknifezerigo create [HOST_NAME]  # Create a host
+      cknifezerigo delete [ID]         # Delete an entry by id
+      cknifezerigo help [TASK]         # Describe available tasks or one specific task
+      cknifezerigo list                # List available host names.
 
 # dub
 
 Like du, but sorts your output by size.  This helps you determine
 which directories are taking up the most space:
 
-    > dub
+    > cknifedub
           37.0G .
           23.0G ./Personal
           14.0G ./Library
