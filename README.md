@@ -1,5 +1,3 @@
-Cali Army Knife
-==============
 
 # Installation
 
