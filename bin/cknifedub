@@ -1,7 +1,7 @@
-#!/usr/bin/ruby
+#!/usr/bin/env ruby
 
 color_highlighting = false
-  
+
 ARGV.each do |arg|
   if arg == '-c'
     color_highlighting = true

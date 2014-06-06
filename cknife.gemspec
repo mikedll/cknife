@@ -14,6 +14,7 @@ Gem::Specification.new do |s|
   s.date = "2014-06-06"
   s.description = "An Amazon Web Services S3 command line tool, and a few other command line tools."
   s.email = "mikedll@mikedll.com"
+  s.executables = ["cknifeaws", "cknifedub", "cknifenowtimestamp", "cknifewcdir", "cknifezerigo"]
   s.extra_rdoc_files = [
     "LICENSE",
     "README.md"
@@ -25,12 +26,13 @@ Gem::Specification.new do |s|
     "README.md",
     "Rakefile",
     "VERSION",
-    "aws.rb",
-    "dub.rb",
-    "install.sh",
-    "nowtimestamp.rb",
-    "wcdir.rb",
-    "zerigo.rb"
+    "bin/cknifeaws",
+    "bin/cknifedub",
+    "bin/cknifenowtimestamp",
+    "bin/cknifewcdir",
+    "bin/cknifezerigo",
+    "cknife.gemspec",
+    "install.sh"
   ]
   s.homepage = "http://github.com/mikedll/cknife"
   s.licenses = ["MIT"]

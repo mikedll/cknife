@@ -1,4 +1,4 @@
-#!/usr/bin/ruby
+#!/usr/bin/env ruby
 
 def run
   wccmd = `find . -ipath #{ARGV[0]} -exec wc -l {} \\;`
