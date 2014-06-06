@@ -31,8 +31,7 @@ Gem::Specification.new do |s|
     "bin/cknifenowtimestamp",
     "bin/cknifewcdir",
     "bin/cknifezerigo",
-    "cknife.gemspec",
-    "install.sh"
+    "cknife.gemspec"
   ]
   s.homepage = "http://github.com/mikedll/cknife"
   s.licenses = ["MIT"]
