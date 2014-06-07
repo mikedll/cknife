@@ -3,8 +3,22 @@
 
 Ruby 1.9.2 is required.
 
-    gem install cknife
-    cknifeaws help
+    > gem install cknife
+    > cknifeaws help
+    Tasks:
+      cknifeaws afew [BUCKET_NAME]                # Show first 5 files in bucket
+      cknifeaws create [BUCKET_NAME]              # Create a bucket
+      cknifeaws create_cloudfront [BUCKET_NAME]   # Create a cloudfront distribution (a CDN)
+      cknifeaws delete [BUCKET_NAME]              # Destroy a bucket
+      cknifeaws download [BUCKET_NAME]            # Download all files in a bucket to CWD. Or one file.
+      cknifeaws help [TASK]                       # Describe available tasks or one specific task
+      cknifeaws list                              # Show all buckets
+      cknifeaws list_cloudfront                   # List cloudfront distributions (CDNs)
+      cknifeaws list_servers                      # Show all servers
+      cknifeaws show [BUCKET_NAME]                # Show info about bucket
+      cknifeaws start_server [SERVER_ID]          # Start a given EC2 server
+      cknifeaws stop_server [SERVER_ID]           # Stop a given EC2 server (does not terminate it)
+      cknifeaws upsync [BUCKET_NAME] [DIRECTORY]  # Push local files matching glob PATTERN into bucket. Ignore unchanged files.      
 
 ## AWS Key and Secret Configuration
 
@@ -21,12 +35,12 @@ The format of your cknife.yml must be like so:
     key: AKIAblahblahb...
     secret: 8xILhOsecretsecretsecretsecret...
 
-
 # Overview
 
-An Amazon Web Services S3 command line tool, and a few other command
-line tools, packaged as a Ruby gem. Written in Ruby with Thor. It
-depends on the Fog gem for all of its S3 operations.
+Cali Army Knife, or cknife, is an Amazon Web Services S3 command line
+tool, and a few other command line tools, packaged as a Ruby
+gem. Written in Ruby with Thor. It depends on the Fog gem for all of
+its S3 operations.
 
 Uses multipart uploads with a chunksize of 10 megabytes to keep RAM
 usage down.
@@ -43,48 +57,36 @@ Which is also pretty useful.
 
 [Github Link](https://github.com/mikedll/cali-army-knife)
 
-Examples:
+Some examples:
 
-    # download entire my-photos bucke to CWD
+Download entire my-photos bucke to CWD
+
     > cknifeaws download my-photos 
     
-    # upload and sync /tmp/*.sql into my-frog-app-backups
-    # bucket. Treat the files as backup files, and keep one backup
-    # file for each of the last 5 months, 10 weeks, and 30 days.    
+Upload and sync `/tmp/*.sql` into `my-frog-app-backups`
+bucket. Treat the files as backup files, and keep one backup
+file for each of the last 5 months, 10 weeks, and 30 days.    
+
     > cknifeaws upsync my-frog-app-backups ./tmp --glob "*.sql" --noprompt --backups-retain true --months-retain 5 --weeks-retain 10 --days-retain 30
 
-    # as above, but now do redis backup files (./tmp/*.rdb). these will not produce
-    # namespace collisions with the sql files, and thus the same bucket
-    # can be used to store backups for both.    
+As above, but now do redis backup files (`./tmp/*.rdb`). these will
+not produce namespace collisions with the sql files, and thus the same
+bucket can be used to store backups for both .sql and .rdb files.
+
     > cknifeaws upsync my-frog-app-backups ./tmp --glob "*.rdb" --noprompt --backups-retain true --months-retain 5 --weeks-retain 10 --days-retain 30
 
-    # DO NOT DO THIS INSTEAD OF THE ABOVE 2 COMMANDS, THINKING IT WILL
-    # TREAT .SQL AND .RDB FILES SEPARATELY. INSTEAD, YOU WILL LOSE
-    # SOME OF YOUR BACKUP FILES.    
+**DO NOT DO THIS INSTEAD OF THE ABOVE 2 COMMANDS, THINKING IT WILL
+TREAT .SQL AND .RDB FILES SEPARATELY. INSTEAD, YOU WILL LOSE
+SOME OF YOUR BACKUP FILES.**
+
     > cknifeaws upsync my-frog-app-backups ./tmp --glob "*" --noprompt --backups-retain true --months-retain 5 --weeks-retain 10 --days-retain 30
 
-    # Dry run mode. Try one of the prior backups retain commands, but
-    # let's see what will happen, first.
+Dry run mode. Try one of the prior backups retain commands, but
+let's see what will happen, first.
+
     > cknifeaws upsync my-frog-app-backups ./tmp --glob "*.sql" --noprompt --backups-retain true --months-retain 5 --weeks-retain 10 --days-retain 30 --dry-run
 
-# aws
-
-    Tasks:
-      cknifeaws afew [BUCKET_NAME]                # Show first 5 files in bucket
-      cknifeaws create [BUCKET_NAME]              # Create a bucket
-      cknifeaws create_cloudfront [BUCKET_NAME]   # Create a cloudfront distribution (a CDN)
-      cknifeaws delete [BUCKET_NAME]              # Destroy a bucket
-      cknifeaws download [BUCKET_NAME]            # Download all files in a bucket to CWD. Or one file.
-      cknifeaws help [TASK]                       # Describe available tasks or one specific task
-      cknifeaws list                              # Show all buckets
-      cknifeaws list_cloudfront                   # List cloudfront distributions (CDNs)
-      cknifeaws list_servers                      # Show all servers
-      cknifeaws show [BUCKET_NAME]                # Show info about bucket
-      cknifeaws start_server [SERVER_ID]          # Start a given EC2 server
-      cknifeaws stop_server [SERVER_ID]           # Stop a given EC2 server (does not terminate it)
-      cknifeaws upsync [BUCKET_NAME] [DIRECTORY]  # Push local files matching glob PATTERN into bucket. Ignore unchanged files.      
-
-## Synchronizing a local directory's files with an Amazon S3 Bucket
+### Synchronizing a local directory's files with an Amazon S3 Bucket
 
     Usage:
       cknifeaws upsync [BUCKET_NAME] [DIRECTORY]
@@ -122,7 +124,7 @@ file is uploaded, in the S3 file metadata. Without this, S3 uses a
 modtime that is equal to when the file was last uploaded, which is not
 comparable to the file's local mod time.
 
-## Dumping an Amazon S3 bucket
+### Dumping an Amazon S3 bucket
 
 Sometimes you want to download an entire S3 bucket to your local
 directory - a set of photos, for example.
@@ -138,21 +140,20 @@ directory - a set of photos, for example.
 
     Download all files in a bucket to CWD. Or one file.
 
+# Zerigo Command Line Interface
 
-# zerigo 
-
-These tasks can be used to manage your DNS via Zerigo.  They changed
+The These tasks can be used to manage your DNS via Zerigo.  They changed
 their rates drastically with little notice in January of 2014, so I
 switched to DNS Simple and don't use this much anymore.
 
-    > cknifezerigo 
+    > cknifezerigo help
     Tasks:
       cknifezerigo create [HOST_NAME]  # Create a host
       cknifezerigo delete [ID]         # Delete an entry by id
       cknifezerigo help [TASK]         # Describe available tasks or one specific task
       cknifezerigo list                # List available host names.
 
-# dub
+# Dub
 
 Like du, but sorts your output by size.  This helps you determine
 which directories are taking up the most space:
@@ -164,6 +165,8 @@ which directories are taking up the most space:
          673.0M ./Work
            0.0B ./Colloquy Transcripts
 
-## options      
+Options:
 
     -c Enable colorized output. 
+
+
