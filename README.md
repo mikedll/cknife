@@ -138,6 +138,30 @@ Download entire my-photos bucket to CWD
 
     > cknifeaws download my-photos 
 
+# SMTP Email Command Line Interface
+
+    > cknifemail help
+    Tasks:
+      cknifemail help [TASK]                             # Describe available tasks or one specific task
+      cknifemail mail [RECIPIENT] [SUBJECT] [TEXT_FILE]  # Send an email to recipient.
+
+Has been tested to work with the SMTP interface that Amazon SES
+provides, but it should work with Sendgrid and Postmark,
+or any SMTP service.
+
+This **requires** the cknife YAML config, with the following field structure.
+
+    mail:
+      from: "Rick Santana <rick.santana@example.com>"
+      authentication: login
+      address: smtp-server
+      port: smtp-port (defaults to 587)
+      username: yoursmtpusername
+      password: yoursmtppassword
+      domain: domain-if-you-like.com
+
+
+
 # Zerigo Command Line Interface
 
 The These tasks can be used to manage your DNS via Zerigo.  They changed
