@@ -29,11 +29,11 @@ class CKnifeEmail < Thor
       delivery_method :smtp, smtp_settings
     end
 
-    from = if !options[:from].blank?
-             options[:from]
-           else
-             config['mail.from']
-           end
+    from = !options[:from].blank? ? options[:from] : config['mail.from']
+    if from.blank?
+      say("No from address found. No action taken.")
+      return
+    end
 
     mail = Mail.new do
       from     from
