@@ -1,7 +1,9 @@
 
+[![Gem Version](https://badge.fury.io/rb/cknife.svg)](http://badge.fury.io/rb/cknife)
+
 # Installation
 
-Ruby 1.9.2 or greater is required.
+Has been tested successfully on Rubies >= 1.9.2 with activesupport >= 3.
 
     > gem install cknife
     > cknifeaws help
