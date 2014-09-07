@@ -18,16 +18,16 @@ class Aws < Thor
       return @config if @config
 
       @config = {
-        :key => ENV["KEY"] || ENV['AMAZON_ACCESS_KEY_ID'], 
+        :key => ENV["KEY"] || ENV['AMAZON_ACCESS_KEY_ID'],
         :secret => ENV["SECRET"] || ENV['AMAZON_SECRET_ACCESS_KEY']
       }
-      
+
       config_file = nil
       Pathname.new(Dir.getwd).tap do |here|
         config_file = [["cknife.yml"], ["tmp", "cknife.yml"]].map { |args|
           here.join(*args)
         }.select { |path|
-          File.exists?(path) 
+          File.exists?(path)
         }.first
       end
 
@@ -36,7 +36,7 @@ class Aws < Thor
           @config.merge!(YAML.load(config_file.read).symbolize_keys!)
         rescue
           say ("Found, but could not parse config: #{config_file}")
-        end        
+        end
       end
 
       @config
@@ -47,13 +47,13 @@ class Aws < Thor
         :provider => 'AWS',
         :aws_access_key_id => config[:key],
         :aws_secret_access_key => config[:secret]
-      }      
+      }
       opts.merge!({ :region => options[:region] }) if !options[:region].blank?
       opts
     end
 
     def fog_storage
-      return @storage if @storage 
+      return @storage if @storage
       @storage = Fog::Storage.new(fog_opts)
       begin
         @storage.directories.count # test login
@@ -81,7 +81,7 @@ class Aws < Thor
         puts "#{s.tags['Name']} (state: #{s.state}): id=#{s.id} keyname=#{s.key_name} dns=#{s.dns_name} flavor=#{s.flavor_id}"
       end
     end
-    
+
     def show_cdns
       puts fog_cdn.get_distribution_list.body['DistributionSummary'].to_yaml
     end
@@ -108,7 +108,7 @@ class Aws < Thor
       dir_path.mkpath
       File.open(s3_file.key, "w") do |f|
         f.write s3_file.body
-      end      
+      end
     end
 
 
@@ -116,7 +116,7 @@ class Aws < Thor
       md5 = Digest::MD5.new
 
       while !file.eof?
-        md5.update(file.read(FILE_BUFFER_SIZE))        
+        md5.update(file.read(FILE_BUFFER_SIZE))
       end
 
       md5.hexdigest
@@ -204,7 +204,7 @@ class Aws < Thor
     }
 
     found.map { |f|
-      matching = unit_to_mult.keys.select { |k| 
+      matching = unit_to_mult.keys.select { |k|
         f.content_length >= unit_to_mult[k]
       }.last
 
@@ -212,13 +212,13 @@ class Aws < Thor
        "#{(f.content_length.to_f / unit_to_mult[matching]).round(2)}#{matching}",
        f.content_type,
        f.last_modified
-      ] 
+      ]
     }.tap do |tabular|
       print_table(tabular, :ident => 2)
     end
 
   end
-  
+
   desc "download [BUCKET_NAME]", "Download all files in a bucket to CWD. Or one file."
   method_options :region => "us-east-1"
   method_options :one => nil
@@ -320,11 +320,11 @@ class Aws < Thor
         end
 
         # don't pointlessly upload large files if we already know we're going to delete them!
-        if options[:backups_retain] 
-          immediate_successors.values.map { |h| h[:local_path] }.tap do |kept_files| 
+        if options[:backups_retain]
+          immediate_successors.values.map { |h| h[:local_path] }.tap do |kept_files|
             before_reject = files.count # blah...lame
-            files.reject! { |to_upload| !kept_files.include?(to_upload) } 
-            sn += before_reject - files.count 
+            files.reject! { |to_upload| !kept_files.include?(to_upload) }
+            sn += before_reject - files.count
 
             say("Found #{files.count} file(s) that meet backups retention criteria for upload. Comparing against bucket...")
 
@@ -365,7 +365,7 @@ class Aws < Thor
               end
             end
             say("updated.")
-            un += 1            
+            un += 1
           elsif existing_head.nil?
             if !options[:dry_run]
               File.open(to_upload) do |localfile|
@@ -399,8 +399,8 @@ class Aws < Thor
           # all the meta data for all the N files.
 
           file_keys_modtimes = []
-          d.files.each { |f| 
-            if File.fnmatch(options[:glob], f.key) 
+          d.files.each { |f|
+            if File.fnmatch(options[:glob], f.key)
               existing_head = d.files.head(f.key)
               md = existing_head.metadata
               file_keys_modtimes.push({
@@ -472,7 +472,7 @@ class Aws < Thor
   method_options :region => "us-east-1"
   def create(bucket_name = nil)
     if !bucket_name
-      puts "No bucket name given." 
+      puts "No bucket name given."
       return
     end
 
@@ -489,7 +489,7 @@ class Aws < Thor
   method_options :region => "us-east-1"
   def show(bucket_name = nil)
     if !bucket_name
-      puts "No bucket name given." 
+      puts "No bucket name given."
       return
     end
 
