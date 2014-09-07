@@ -1,11 +1,20 @@
 
 [![Gem Version](https://badge.fury.io/rb/cknife.svg)](http://badge.fury.io/rb/cknife)
 
+# Overview
+
+Cali Army Knife, or cknife, is a collection of command line tools.
+It's written in Ruby with Thor, and packaged as a Ruby gem.  It
+depends on the Fog gem for all of it's S3 operations.
+
 # Installation
 
 Has been tested successfully on Rubies >= 1.9.2 with activesupport >= 3.
 
     > gem install cknife
+
+# Amazon Web Services (AWS) Command Line Interface
+
     > cknifeaws help
     Tasks:
       cknifeaws afew [BUCKET_NAME]                # Show first 5 files in bucket
@@ -22,9 +31,9 @@ Has been tested successfully on Rubies >= 1.9.2 with activesupport >= 3.
       cknifeaws stop_server [SERVER_ID]           # Stop a given EC2 server (does not terminate it)
       cknifeaws upsync [BUCKET_NAME] [DIRECTORY]  # Push local files matching glob PATTERN into bucket. Ignore unchanged files.      
 
-## AWS Key and Secret Configuration
+### AWS Key and Secret Configuration
 
-In order of priority, Setup your key and secret with:
+Setup your AWS key and secret in any of these methods, in order of priority:
 
   - $CWD/cknife.yml
   - $CWD/tmp/cknife.yml
@@ -37,34 +46,29 @@ The format of your cknife.yml must be like so:
     key: AKIAblahblahb...
     secret: 8xILhOsecretsecretsecretsecret...
 
-# Overview
+### Upload a local directory into an S3 Bucket
 
-Cali Army Knife, or cknife, is an Amazon Web Services S3 command line
-tool, and a few other command line tools, packaged as a Ruby
-gem. Written in Ruby with Thor. It depends on the Fog gem for all of
-its S3 operations.
+    Usage:
+      cknifeaws upsync [BUCKET_NAME] [DIRECTORY]
 
-Uses multipart uploads with a chunksize of 10 megabytes to keep RAM
-usage down.
-
-The premier feature of the tool is the "upsync" command, which can be
-used to run a backups schedule with multiple classes of files
-(partitioned by a glob pattern). **It is your responsibility to
-generate one uniquely-named backup file per day**, as this tool does
-not do that part for you.
-
-If you *don't* use the `backups-retain` option, then its like a very
-weak **rsync** that can upload from a local filesystem into a bucket.
-Which is also pretty useful.
-
-[Github Link](https://github.com/mikedll/cali-army-knife)
+    Options:
+      [--public]             
+      [--region=REGION]      
+                             # Default: us-east-1
+      [--noprompt=NOPROMPT]  
+      [--glob=GLOB]          
+                             # Default: **/*
+      [--backups-retain]     
+      [--days-retain=N]      
+                             # Default: 30
+      [--months-retain=N]    
+                             # Default: 3
+      [--weeks-retain=N]     
+                             # Default: 5
+      [--dry-run]            
 
 Some examples:
 
-Download entire my-photos bucke to CWD
-
-    > cknifeaws download my-photos 
-    
 Upload and sync `/tmp/*.sql` into `my-frog-app-backups`
 bucket. Treat the files as backup files, and keep one backup
 file for each of the last 5 months, 10 weeks, and 30 days.    
@@ -88,45 +92,33 @@ let's see what will happen, first.
 
     > cknifeaws upsync my-frog-app-backups ./tmp --glob "*.sql" --noprompt --backups-retain true --months-retain 5 --weeks-retain 10 --days-retain 30 --dry-run
 
-### Synchronizing a local directory's files with an Amazon S3 Bucket
+This is the premier feature of the gem.
 
-    Usage:
-      cknifeaws upsync [BUCKET_NAME] [DIRECTORY]
+Uses multipart uploads with a chunksize of 10 megabytes to keep RAM
+usage down.
 
-    Options:
-      [--public]             
-      [--region=REGION]      
-                             # Default: us-east-1
-      [--noprompt=NOPROMPT]  
-      [--glob=GLOB]          
-                             # Default: **/*
-      [--backups-retain]     
-      [--days-retain=N]      
-                             # Default: 30
-      [--months-retain=N]    
-                             # Default: 3
-      [--weeks-retain=N]     
-                             # Default: 5
-      [--dry-run]            
+It can be used to run a backups schedule with multiple classes of
+files (partitioned by a glob pattern). **It is your responsibility to
+generate one uniquely-named backup file per day**, as this tool does
+not do that part for you.
+
+If you *don't* use the `backups-retain` option, then its like a very
+weak **rsync** that can upload from a local filesystem into a bucket.
+Which is also pretty useful.
 
 The glob allows you to determine whether you want to recursively
 upload an entire directory, or just a set of *.dat or *.sql files,
 ignoring whatever else may be in the specified directory. This glob
 pattern is appended to the directory you specify.
 
-For determining whether to upload a file, first the mod time is used,
-and if that match fails, an md5 checksum comparison is used.
+For determining whether to upload a file, it uses the file's local
+filesystem modification time, and if there is a mismatch then it does
+an md5 checksum comparison, and if there is a mismatch there, then the
+local file will replace the remote one in S3. The file's local
+filesystem modification time is stored on S3 in the S3 object's
+metadata when the file is uploaded.
 
-The file's local modification time, from the file system from which it
-was uploaded, is used to determined whether it qualifies for retention
-in the backup program you specify.
-
-This info is uploaded with the file to Amazon's S3 servers when the
-file is uploaded, in the S3 file metadata. Without this, S3 uses a
-modtime that is equal to when the file was last uploaded, which is not
-comparable to the file's local mod time.
-
-### Dumping an Amazon S3 bucket
+### Download an S3 bucket to a local directory
 
 Sometimes you want to download an entire S3 bucket to your local
 directory - a set of photos, for example.
@@ -141,6 +133,10 @@ directory - a set of photos, for example.
       [--one=ONE]        
 
     Download all files in a bucket to CWD. Or one file.
+
+Download entire my-photos bucket to CWD
+
+    > cknifeaws download my-photos 
 
 # Zerigo Command Line Interface
 
@@ -172,7 +168,9 @@ Options:
     -c Enable colorized output. 
 
 
-# Development
+# Contributing
+
+### Making a release
 
 Be on master.
 
