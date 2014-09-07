@@ -1,11 +1,8 @@
 #!/usr/bin/env ruby
 
-require 'rubygems'
-require 'bundler'
-Bundler.setup(:default)
-
+require 'thor'
 require 'action_mailer'
-require 'lib/cknife/config'
+require 'cknife/config'
 
 class CKnifeEmail < Thor
 
