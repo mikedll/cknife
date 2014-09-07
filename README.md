@@ -188,3 +188,13 @@ Make a gem release. This will generate a commit and a tag for v0.1.2.
 
     bundle exec rake release
 
+### Invoking commands without clobbering the gemspec
+
+You can uncommente the 'gem cknife' line in the Gemfile.
+
+This allows you to test your changes without having to run `rake
+install` if you don't want to, after every file edit.
+
+Don't generate the gemspec with this on, though, or it'll be a self-dependency
+which isn't really what we want.
+
