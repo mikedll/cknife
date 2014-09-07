@@ -1,7 +1,7 @@
 
 # Installation
 
-Ruby 1.9.2 or greater is required.
+Has been tested successfully on Rubies >= 1.9.2 with activesupport >= 3.
 
     > gem install cknife
     > cknifeaws help
