@@ -4,14 +4,16 @@ require 'thor'
 require 'action_mailer'
 require 'cknife/config'
 
+
 class CKnifeEmail < Thor
 
   class Mailer < ActionMailer::Base
-    default from: from
-
-    def email
+    def email(from, recipient, subject, template_name)
       @var = "var"
-      mail(:to => recipient, :subject => subject, :template => template_name) do |format|
+      mail(:from => from,
+           :to => recipient,
+           :subject => subject,
+           :template => template_name) do |format|
         format.text
         format.html
       end
@@ -48,7 +50,7 @@ class CKnifeEmail < Thor
              config['mail.from']
            end
 
-    email = CKnifeEmail.email
+    email = CKnifeEmail.email(from, recipient, subject, template_name)
     puts email
     email.deliver
   end
