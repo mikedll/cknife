@@ -19,7 +19,7 @@ module CKnife
 
       if config_file
         begin
-          @config.merge!(YAML.load(config_file.read).symbolize_keys!)
+          @config.merge!(YAML.load(config_file.read))
         rescue
           say ("Found, but could not parse config: #{config_file}")
         end
