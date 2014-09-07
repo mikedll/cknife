@@ -11,6 +11,7 @@ depends on the Fog gem for all of it's S3 operations.
 
 Has been tested successfully on Rubies >= 1.9.2 with activesupport >= 3.
 
+    > \curl -sSL https://get.rvm.io | bash -s stable --ruby
     > gem install cknife
 
 # Amazon Web Services (AWS) Command Line Interface
