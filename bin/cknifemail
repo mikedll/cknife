@@ -19,14 +19,15 @@ class CKnifeEmail < Thor
   end
 
   no_tasks do
+
     def config
       @config ||= CKnife::Config
     end
   end
 
-  desc "send [recipient] [subject] [template_name]", "Send an email to recipient."
+  desc "mail [RECIPIENT] [SUBJECT] [TEMPLATE_NAME]", "Send an email to recipient."
   method_options :from => "no-reply@example.com"
-  def send(recipient, subject, template_name)
+  def mail(recipient, subject, template_name)
 
     ActionMailer::Base.raise_delivery_errors = true
     ActionMailer::Base.delivery_method = :smtp
