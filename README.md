@@ -1,4 +1,6 @@
 
+[![Gem Version](https://badge.fury.io/rb/cknife.svg)](http://badge.fury.io/rb/cknife)
+
 # Installation
 
 Has been tested successfully on Rubies >= 1.9.2 with activesupport >= 3.
