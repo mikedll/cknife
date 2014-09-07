@@ -38,14 +38,6 @@ module CKnife
         cur = cur[segment.force_encoding('UTF-8').to_s] if cur
       end
 
-      # retry, this time with env prefix.
-      if cur.nil?
-        cur = config[Rails.env]
-        path.to_s.split('.').each do |segment|
-          cur = cur[segment.force_encoding('UTF-8').to_s] if cur
-        end
-      end
-
       if cur.nil?
         cur = ENV[path]
       end
