@@ -170,3 +170,28 @@ Options:
     -c Enable colorized output. 
 
 
+# Development
+
+Be on master.
+
+    git checkout master
+
+One of the following, like patch. This will create a git commit.
+
+    bundle exec rake version:bump:major
+    bundle exec rake version:bump:minor
+    bundle exec rake version:bump:patch
+
+Create the gem spec.
+
+    bundle exec rake gemspec:generate
+    git add -A
+    git commit -m "Generated gemspec for version 0.1.2..."
+
+Move to master and make a release.
+
+    git flow release start rNN
+    git flow release finish rNN
+    git checkout master   # I think sometimes release finish moves to develop branch.
+    bundle exec rake release
+
