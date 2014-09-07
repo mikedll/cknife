@@ -13,21 +13,23 @@ class CKnifeEmail < Thor
   end
 
   desc "mail [RECIPIENT] [SUBJECT] [TEXT_FILE]", "Send an email to recipient."
-  method_options :from => "no-reply@example.com"
+  method_options :from => ""
   def mail(recipient, subject, text_file)
+    smtp_settings = {
+      :address   => config['mail.address'],
+      :port      => config['mail.port'] || 587,
+      :domain    => config['mail.domain'],
+      :authentication => config['mail.authentication'].to_sym,
+      :user_name      => config['mail.username'],
+      :password       => config['mail.password'],
+      :enable_starttls_auto => true
+    }
+
     Mail.defaults do
-      delivery_method :smtp, {
-        :address   => config['mail.address'],
-        :port      => config['mail.port'] || 587,
-        :domain    => config['mail.domain'],
-        :authentication => config['mail.authentication'].to_sym,
-        :user_name      => config['mail.username'],
-        :password       => config['mail.password'],
-        :enable_starttls_auto => true
-      }
+      delivery_method :smtp, smtp_settings
     end
 
-    from = if options[:from]
+    from = if !options[:from].blank?
              options[:from]
            else
              config['mail.from']
@@ -39,8 +41,11 @@ class CKnifeEmail < Thor
       subject  subject
       body     File.read(text_file)
     end
-    puts mail
-    email.deliver
+
+    mail.deliver
+
+    say("Mail delivered to #{recipient}.")
+
   end
 end
 
