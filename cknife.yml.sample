@@ -1,0 +1,13 @@
+---
+key: AKIAblahblahb...
+secret: 8xILhOsecretsecretsecretsecret...
+
+
+mail:
+  from: me@mydomain.com
+  authentication: login
+  address: email-smtp.us-west-2.amazonaws.com
+  username: MYSESusername
+  password: MYSESpassword
+  domain: mydomain.com
+
