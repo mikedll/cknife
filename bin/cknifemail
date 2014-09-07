@@ -1,48 +1,31 @@
 #!/usr/bin/env ruby
 
 require 'thor'
-require 'action_mailer'
+require 'mail'
 require 'cknife/config'
-
 
 class CKnifeEmail < Thor
 
-  class Mailer < ActionMailer::Base
-    def email(from, recipient, subject, template_name)
-      @var = "var"
-      mail(:from => from,
-           :to => recipient,
-           :subject => subject,
-           :template => template_name) do |format|
-        format.text
-        format.html
-      end
-    end
-  end
-
   no_tasks do
-
     def config
       @config ||= CKnife::Config
     end
   end
 
-  desc "mail [RECIPIENT] [SUBJECT] [TEMPLATE_NAME]", "Send an email to recipient."
+  desc "mail [RECIPIENT] [SUBJECT] [TEXT_FILE]", "Send an email to recipient."
   method_options :from => "no-reply@example.com"
-  def mail(recipient, subject, template_name)
-
-    ActionMailer::Base.raise_delivery_errors = true
-    ActionMailer::Base.delivery_method = :smtp
-    ActionMailer::Base.view_paths = Dir.getwd
-    ActionMailer::Base.smtp_settings = {
-      :address   => config.get('mail.address'),
-      :port      => config.get('mail.port') || 587,
-      :domain    => config.get('mail.domain'),
-      :authentication => config.get('mail.authentication').to_sym,
-      :user_name      => config.get('mail.username'),
-      :password       => config.get('mail.password'),
-      :enable_starttls_auto => true
-    }
+  def mail(recipient, subject, text_file)
+    Mail.defaults do
+      delivery_method :smtp, {
+        :address   => config['mail.address'],
+        :port      => config['mail.port'] || 587,
+        :domain    => config['mail.domain'],
+        :authentication => config['mail.authentication'].to_sym,
+        :user_name      => config['mail.username'],
+        :password       => config['mail.password'],
+        :enable_starttls_auto => true
+      }
+    end
 
     from = if options[:from]
              options[:from]
@@ -50,8 +33,13 @@ class CKnifeEmail < Thor
              config['mail.from']
            end
 
-    email = CKnifeEmail.email(from, recipient, subject, template_name)
-    puts email
+    mail = Mail.new do
+      from     from
+      to       recipient
+      subject  subject
+      body     File.read(text_file)
+    end
+    puts mail
     email.deliver
   end
 end
