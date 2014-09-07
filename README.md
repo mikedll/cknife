@@ -172,10 +172,6 @@ Options:
 
 ### Making a release
 
-Be on master.
-
-    git checkout master
-
 One of the following, like patch. This will create a git commit.
 
     bundle exec rake version:bump:major
@@ -188,10 +184,7 @@ Create the gem spec.
     git add -A
     git commit -m "Generated gemspec for version 0.1.2..."
 
-Move to master and make a release.
+Make a gem release. This will generate a commit and a tag for v0.1.2.
 
-    git flow release start rNN
-    git flow release finish rNN
-    git checkout master   # I think sometimes release finish moves to develop branch.
     bundle exec rake release
 
