@@ -206,7 +206,7 @@ Create the gem spec.
 
     bundle exec rake gemspec:generate
     git add -A
-    git commit -m "Generated gemspec for version 0.1.2..."
+    git commit -m "Generated gemspec for version 0.1.4"
 
 Make a gem release. This will generate a commit and a tag for v0.1.2.
 
