@@ -146,9 +146,27 @@ Download entire my-photos bucket to CWD
       cknifemail help [TASK]                             # Describe available tasks or one specific task
       cknifemail mail [RECIPIENT] [SUBJECT] [TEXT_FILE]  # Send an email to recipient.
 
-Has been tested to work with the SMTP interface that Amazon SES
-provides, but it should work with Sendgrid and Postmark,
-or any SMTP service.
+Only simple email sending is available here, for now.
+
+### Send an email
+
+    > bundle exec ./bin/cknifemail help mail 
+    Usage:
+      cknifemail mail [RECIPIENT] [SUBJECT] [TEXT_FILE]
+
+    Options:
+      [--from=FROM]      
+      [--simple-format]  
+                         # Default: true
+
+The `simple_format` option is available to help format plaintext
+emails whose bodies you don't want messed up when newlines are ignored
+with html formatting. This is helpful for when log files are included
+in email bodies, which is the primary expectation for how this will
+be used.
+
+Has been successfully tested with the SMTP interface to Amazon SES and
+Sendgrid. Should work with Postmark just fine.
 
 This **requires** the cknife YAML config, with the following field structure.
 
