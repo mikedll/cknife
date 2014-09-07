@@ -18,7 +18,7 @@ Jeweler::Tasks.new do |gem|
   gem.homepage = "http://github.com/mikedll/cali-army-knife"
   gem.license = "MIT"
   gem.summary = "Cali Army Knife"
-  gem.description = "An Amazon Web Services S3 command line tool, and a few other command line tools."
+  gem.description = "Cali Army Knife, a collection of command line tools, especially for popular API services."
   gem.email = "mikedll@mikedll.com"
   gem.authors = ["Mike De La Loza"]
   # dependencies defined in Gemfile
