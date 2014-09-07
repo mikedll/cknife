@@ -14,6 +14,7 @@ class CKnifeEmail < Thor
 
   desc "mail [RECIPIENT] [SUBJECT] [TEXT_FILE]", "Send an email to recipient."
   method_options :from => ""
+  method_options :simple_format => true
   def mail(recipient, subject, text_file)
     smtp_settings = {
       :address   => config['mail.address'],
@@ -35,15 +36,24 @@ class CKnifeEmail < Thor
       return
     end
 
+    body = File.read(text_file)
+    body_html = options[:simple_format] ? CKnife::Formatter.new.simple_format(body) : nil
+
     mail = Mail.new do
       from     from
       to       recipient
       subject  subject
-      body     File.read(text_file)
+      body     body
+
+      if body_html
+        html_part do
+          content_type 'text/html; charset=UTF-8'
+          body body_html
+        end
+      end
     end
 
     mail.deliver
-
     say("Mail delivered to #{recipient}.")
 
   end

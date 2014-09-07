@@ -1,4 +1,11 @@
+require 'action_view'
+
 module CKnife
+  class Formatter
+    include ActionView::Helpers::TagHelper
+    include ActionView::Helpers::TextHelper
+  end
+
   class Config
     def self.config
       return @config if @config
