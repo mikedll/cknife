@@ -1,0 +1,59 @@
+#!/usr/bin/env ruby
+
+require 'rubygems'
+require 'bundler'
+Bundler.setup(:default)
+
+require 'action_mailer'
+require 'lib/cknife/config'
+
+class CKnifeEmail < Thor
+
+  class Mailer < ActionMailer::Base
+    default from: from
+
+    def email
+      @var = "var"
+      mail(:to => recipient, :subject => subject, :template => template_name) do |format|
+        format.text
+        format.html
+      end
+    end
+  end
+
+  no_tasks do
+    def config
+      @config ||= CKnife::Config
+    end
+  end
+
+  desc "send [recipient] [subject] [template_name]", "Send an email to recipient."
+  method_options :from => "no-reply@example.com"
+  def send(recipient, subject, template_name)
+
+    ActionMailer::Base.raise_delivery_errors = true
+    ActionMailer::Base.delivery_method = :smtp
+    ActionMailer::Base.view_paths = Dir.getwd
+    ActionMailer::Base.smtp_settings = {
+      :address   => config.get('mail.address'),
+      :port      => config.get('mail.port') || 587,
+      :domain    => config.get('mail.domain'),
+      :authentication => config.get('mail.authentication').to_sym,
+      :user_name      => config.get('mail.username'),
+      :password       => config.get('mail.password'),
+      :enable_starttls_auto => true
+    }
+
+    from = if options[:from]
+             options[:from]
+           else
+             config['mail.from']
+           end
+
+    email = CKnifeEmail.email
+    puts email
+    email.deliver
+  end
+end
+
+CKnifeEmail.start
