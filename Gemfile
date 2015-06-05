@@ -8,7 +8,7 @@ gem "actionpack", '>= 3.0'
 gem "mail"
 gem "thor", '>= 0.14'
 gem "builder", '>= 3.0'
-gem "fog", '>= 1.15'
+gem "fog", '= 1.17'
 gem "unf", '>= 0.1'
 
 # Add dependencies to develop your gem here.
