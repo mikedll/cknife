@@ -194,6 +194,11 @@ switched to DNS Simple and don't use this much anymore.
       cknifezerigo help [TASK]         # Describe available tasks or one specific task
       cknifezerigo list                # List available host names.
 
+# Postgre SQL Backups
+
+Setup Postgres credentials in a Rails-style configuration (in the same
+cknife config file) and you can capture a snapshot of your database.
+
 # Dub
 
 Like du, but sorts your output by size.  This helps you determine
