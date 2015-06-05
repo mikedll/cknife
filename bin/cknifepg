@@ -6,48 +6,71 @@ require 'cknife/config'
 class CKnifePg < Thor
 
   no_tasks do
+
     def config
       @config ||= CKnife::Config
+    end
+
+    def conf
+      @conf ||= {
+        :host      => config['pg.host'] || "localhost",
+        :port      => config['pg.port'] || 5432,
+        :database  => config['pg.database'],
+        :username  => config['pg.username'],
+        :password  => config['pg.password']
+      }
+    end
+
+    def with_pg_pass_file(cmd)
+      pg_pass_file ||= ".pgpass"
+
+      if File.exists?(pg_pass_file)
+        say("This generates a pgpass file but one is already on disk. Exiting.")
+        return
+      end
+
+      # pgpass format
+      File.open(pg_pass_file, "w", 0600) { |f| f.write "#{conf[:host]}:#{conf[:port]}:#{conf[:database]}:#{conf[:username]}:#{conf[:password]}" }
+
+      puts cmd
+      output = system({'PGPASSFILE' => pg_pass_file}, cmd)
+      yield
+
+      FileUtils.rm(pg_pass_file)
+      if File.exists?(pg_pass_file)
+        say("Failed to remove pg_pass file. Please remove it for security purposes.")
+      end
     end
   end
 
   desc "capture", "Capture a dump of the database to db(current timestamp).dump."
   def capture
     file_name = "db" + Time.now.strftime("%Y%m%d%H%M%S") + ".dump"
-
-    conf = {
-      :host      => config['pg.host'] || "localhost",
-      :port      => config['pg.port'] || 5432,
-      :database  => config['pg.database'],
-      :username  => config['pg.username'],
-      :password  => config['pg.password']
-    }
-
-    pg_pass_file = ".pgpass"
-
-    if File.exists?(pg_pass_file)
-      say("This generates a pgpass file but one is already on disk. Exiting.")
-      return
-    end
-
-    # pgpass format
-    File.open(pg_pass_file, "w", 0600) { |f| f.write "#{conf[:host]}:#{conf[:port]}:#{conf[:database]}:#{conf[:username]}:#{conf[:password]}" }
-
-    output = system({'PGPASSFILE' => pg_pass_file}, "pg_dump --no-owner -h #{conf[:host]} -p #{conf[:port]} -U #{conf[:username]} --no-password -f #{file_name} #{conf[:database]}")
-
-    say("Captured #{file_name}.")
-
-    FileUtils.rm(pg_pass_file)
-    if File.exists?(pg_pass_file)
-      say("Failed to remove pg_pass file. Please remove it for security purposes.")
+    with_pg_pass_file("pg_dump -Fc --no-owner -h #{conf[:host]} -p #{conf[:port]} -U #{conf[:username]} --no-password -f #{file_name} #{conf[:database]}") do
+      say("Captured #{file_name}.")
     end
   end
 
-  desc "restore [FILENAME]", "Restore a file. Use the one with the most recent mtime by default. Searches for *.dump files in the CWD."
+  desc "restore", "Restore a file. Use the one with the most recent mtime by default. Searches for db*.dump files in the CWD."
+  method_options :filename => nil
   def restore
-    # find file.
-    # invoke pgrestore
-    # cleanup
+    to_restore = options[:filename] if options[:filename]
+    if to_restore.nil?
+      files = Dir["db*.dump"]
+      with_mtime = files.map { |f| [f, File.mtime(f)] }
+      with_mtime.sort! { |a,b| a.last <=> b.last }
+      files = with_mtime.map(&:first)
+      to_restore = files.last
+    end
+
+    if to_restore.nil?
+      say("No backups file to restore. None given on the command line and none could be found in the CWD.")
+      return
+    end
+
+    with_pg_pass_file("pg_restore -no-owner -h #{conf[:host]} -p #{conf[:port]} -U #{conf[:username]} -d #{conf[:database]} --no-password #{to_restore}") do
+      say("Restored #{to_restore}")
+    end
   end
 end
 
