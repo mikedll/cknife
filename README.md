@@ -199,6 +199,14 @@ switched to DNS Simple and don't use this much anymore.
 Setup Postgres credentials in a Rails-style configuration (in the same
 cknife config file) and you can capture a snapshot of your database.
 
+    > bundle exec cknifepg help 
+    Tasks:
+      cknifepg capture      # Capture a dump of the database to db(current timestamp).dump.
+      cknifepg disconnect   # Disconnect all sessions from the database. You must have a superuser configured for this to work.
+      cknifepg help [TASK]  # Describe available tasks or one specific task
+      cknifepg restore      # Restore a file. Use the one with the most recent mtime by default. Searches for db*.dump files in the CWD.
+      cknifepg sessions     # List active sessions in this database and provide a string suitable for giving to kill for stopping those sessions.
+
 # Dub
 
 Like du, but sorts your output by size.  This helps you determine
