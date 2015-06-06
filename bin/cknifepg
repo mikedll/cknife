@@ -105,6 +105,17 @@ class CKnifePg < Thor
     end
   end
 
+  desc "sessions", "List active sessions in this database."
+  def sessions
+    with_pg_pass_file do
+      my_pid = pg_pass_file_execute(psql_invocation, "select pg_backend_pid();").split.first
+      ids_output = pg_pass_file_execute(psql_invocation, "SELECT procpid, application_name FROM pg_stat_activity WHERE datname = '#{conf[:database]}' AND procpid != #{my_pid};")
+      table = ids_output.split.map { |line| line.split("|") }
+      print_table([["PID", "Application Name"]] + table, :indent => 2)
+      ids = table.map { |row| row.first }
+    end
+  end
+
   desc "restore", "Restore a file. Use the one with the most recent mtime by default. Searches for db*.dump files in the CWD."
   method_options :filename => nil
   def restore
