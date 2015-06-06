@@ -31,8 +31,9 @@ class CKnifePg < Thor
 
     def pg_pass_file_execute(cmd)
       puts cmd
-      output = system({'PGPASSFILE' => pg_pass_file}, cmd)
+      result = system({'PGPASSFILE' => pg_pass_file}, cmd)
       yield if block_given?
+      result
     end
 
     def with_pg_pass_file
@@ -58,11 +59,14 @@ class CKnifePg < Thor
   def capture
     file_name = "db" + Time.now.strftime("%Y%m%d%H%M%S") + ".dump"
 
+    ok = true
     with_pg_pass_file do
-      pg_pass_file_execute("pg_dump -Fc --no-owner #{connection_options} -f #{file_name} #{conf[:database]}") do
+      ok = pg_pass_file_execute("pg_dump -Fc --no-owner #{connection_options} -f #{file_name} #{conf[:database]}") do
         say("Captured #{file_name}.")
       end
     end
+
+    say("Command failed.", :red) if !ok
   end
 
   desc "restore", "Restore a file. Use the one with the most recent mtime by default. Searches for db*.dump files in the CWD."
@@ -82,12 +86,16 @@ class CKnifePg < Thor
       return
     end
 
+    ok = true
     with_pg_pass_file do
-      pg_pass_file_execute("dropdb #{connection_options} #{conf[:database]}")
-      pg_pass_file_execute("pg_restore --no-owner -C #{connection_options} -d #{conf[:database]} #{to_restore}") do
+      ok = pg_pass_file_execute("dropdb #{connection_options} #{conf[:database]}")
+      ok = ok && pg_pass_file_execute("createdb #{connection_options} #{conf[:database]}")
+      ok = ok && pg_pass_file_execute("pg_restore --no-owner -C #{connection_options} -d #{conf[:database]} #{to_restore}") do
         say("Restored #{to_restore}")
       end
     end
+
+    say("Command failed.", :red) if !ok
   end
 end
 
