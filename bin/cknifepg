@@ -54,6 +54,11 @@ class CKnifePg < Thor
     end
 
     def with_pg_pass_file
+      if @session_live
+        return yield
+      end
+
+      @session_live = true
       @session_ok = true
 
       if File.exists?(pg_pass_file)
@@ -64,7 +69,7 @@ class CKnifePg < Thor
       # pgpass format
       File.open(pg_pass_file, "w", 0600) { |f| f.write "#{conf[:host]}:#{conf[:port]}:*:#{conf[:username]}:#{conf[:password]}" }
 
-      yield
+      result = yield
 
       FileUtils.rm(pg_pass_file)
       if File.exists?(pg_pass_file)
@@ -72,6 +77,9 @@ class CKnifePg < Thor
       end
 
       say("Command failed.", :red) if !@session_ok
+      @session_live = false
+
+      result
     end
   end
 
