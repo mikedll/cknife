@@ -119,7 +119,7 @@ DEPENDENCIES
   bundler (~> 1.0)
   fog (>= 1.15, <= 1.17)
   i18n (~> 0)
-  jeweler (>= 2.0)
+  jeweler (~> 2.0)
   mail (~> 2.4)
   nokogiri (~> 1, >= 1.6)
   rest-client (~> 1, >= 1.6)
