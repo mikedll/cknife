@@ -6,7 +6,6 @@ require 'cknife/config'
 class CKnifePg < Thor
 
   no_tasks do
-
     def config
       @config ||= CKnife::Config
     end
@@ -30,13 +29,17 @@ class CKnifePg < Thor
     end
 
     def pg_pass_file_execute(cmd)
+      return if !@session_ok
       puts cmd
       result = system({'PGPASSFILE' => pg_pass_file}, cmd)
+      @session_ok = @session_ok && result
       yield if block_given?
       result
     end
 
     def with_pg_pass_file
+      @session_ok = true
+
       if File.exists?(pg_pass_file)
         say("This generates a pgpass file but one is already on disk. Exiting.")
         return
@@ -51,22 +54,20 @@ class CKnifePg < Thor
       if File.exists?(pg_pass_file)
         say("Failed to remove pg_pass file. Please remove it for security purposes.")
       end
-    end
 
+      say("Command failed.", :red) if !@session_ok
+    end
   end
 
   desc "capture", "Capture a dump of the database to db(current timestamp).dump."
   def capture
     file_name = "db" + Time.now.strftime("%Y%m%d%H%M%S") + ".dump"
 
-    ok = true
     with_pg_pass_file do
-      ok = pg_pass_file_execute("pg_dump -Fc --no-owner #{connection_options} -f #{file_name} #{conf[:database]}") do
+      pg_pass_file_execute("pg_dump -Fc --no-owner #{connection_options} -f #{file_name} #{conf[:database]}") do
         say("Captured #{file_name}.")
       end
     end
-
-    say("Command failed.", :red) if !ok
   end
 
   desc "restore", "Restore a file. Use the one with the most recent mtime by default. Searches for db*.dump files in the CWD."
@@ -82,20 +83,17 @@ class CKnifePg < Thor
     end
 
     if to_restore.nil?
-      say("No backups file to restore. None given on the command line and none could be found in the CWD.")
+      say("No backups file to restore. None given on the command line and none could be found in the CWD.", :red)
       return
     end
 
-    ok = true
     with_pg_pass_file do
-      ok = pg_pass_file_execute("dropdb #{connection_options} #{conf[:database]}")
-      ok = ok && pg_pass_file_execute("createdb #{connection_options} #{conf[:database]}")
-      ok = ok && pg_pass_file_execute("pg_restore --no-owner -C #{connection_options} -d #{conf[:database]} #{to_restore}") do
+      pg_pass_file_execute("dropdb #{connection_options} #{conf[:database]}")
+      pg_pass_file_execute("createdb #{connection_options} #{conf[:database]}")
+      pg_pass_file_execute("pg_restore --no-owner -C #{connection_options} -d #{conf[:database]} #{to_restore}") do
         say("Restored #{to_restore}")
       end
     end
-
-    say("Command failed.", :red) if !ok
   end
 end
 
