@@ -112,6 +112,10 @@ class CKnifePg < Thor
     if to_restore.nil?
       say("No backups file to restore. None given on the command line and none could be found in the CWD.", :red)
       return
+    else
+      if !yes?("Restore #{to_restore}?", :green)
+        return
+      end
     end
 
     with_pg_pass_file do
