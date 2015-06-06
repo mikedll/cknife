@@ -231,6 +231,32 @@ Options:
 
     -c Enable colorized output. 
 
+# A typical cron script for capturing PostgreSQL backups and uploading them to S3
+
+    source "$HOME/.rvm/scripts/rvm";
+
+    rvm use 2.0.0;
+
+    cd path/to/backups/dir/with/cknife/config;
+
+    cknifepg capture;
+
+    cknifeaws upsync backups-bucket . --noprompt --backups-retain --glob="db*.dump";
+
+Which can be used with the following sample [crontab](http://en.wikipedia.org/wiki/Cron#Examples),
+executing once a day at 2am:
+
+    # * * * * *  command to execute
+    # │ │ │ │ │
+    # │ │ │ │ │
+    # │ │ │ │ └───── day of week (0 - 6) (0 to 6 are Sunday to Saturday, or use names; 7 is Sunday, the same as 0)
+    # │ │ │ └────────── month (1 - 12)
+    # │ │ └─────────────── day of month (1 - 31)
+    # │ └──────────────────── hour (0 - 23)
+    # └───────────────────────── min (0 - 59)
+
+    0 2 * * *  path/to/script > /dev/null
+
 
 # Contributing
 
