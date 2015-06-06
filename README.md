@@ -196,6 +196,14 @@ switched to DNS Simple and don't use this much anymore.
 
 # Postgre SQL Backups
 
+This requires the following setup in the configuration:
+
+    pg:
+      host: localhost
+      database: dbname
+      username: dbuser
+      password: dbpassword
+
 Setup Postgres credentials in a Rails-style configuration (in the same
 cknife config file) and you can capture a snapshot of your database.
 

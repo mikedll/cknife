@@ -11,3 +11,9 @@ mail:
   password: MYSESpassword
   domain: mydomain.com
 
+pg:
+  host: localhost
+  database: dbname
+  username: dbuser
+  password: dbpassword
+
