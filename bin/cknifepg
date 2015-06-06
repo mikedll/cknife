@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 
+require 'open3'
 require 'thor'
 require 'cknife/config'
 
@@ -24,17 +25,32 @@ class CKnifePg < Thor
       "-h #{conf[:host]} -p #{conf[:port]} -U #{conf[:username]} --no-password"
     end
 
+    def psql_invocation
+      "psql #{connection_options} -d #{conf[:database]} --no-align --tuples-only"
+    end
+
     def pg_pass_file
       @pg_pass_file = ".pgpass"
     end
 
-    def pg_pass_file_execute(cmd)
+    def pg_pass_file_execute(cmd, input = nil)
       return if !@session_ok
       puts cmd
-      result = system({'PGPASSFILE' => pg_pass_file}, cmd)
-      @session_ok = @session_ok && result
+      stdin, stdout, stderr, wait_thread = Open3.popen3({'PGPASSFILE' => pg_pass_file}, cmd)
+      if input
+        puts input
+        stdin.write input
+        stdin.close
+      end
+      output = stdout.read
+      $stdout.write output
+      $stderr.write stderr.read
+      stdout.close
+      stderr.close
+      result = wait_thread.value.to_i
+      @session_ok = @session_ok && (result == 0)
       yield if block_given?
-      result
+      output
     end
 
     def with_pg_pass_file
@@ -56,6 +72,17 @@ class CKnifePg < Thor
       end
 
       say("Command failed.", :red) if !@session_ok
+    end
+  end
+
+  desc "disconnect", "Disconnect all sessions from the database. You must have a superuser configured for this to work."
+  def disconnect
+    with_pg_pass_file do
+      my_pid = pg_pass_file_execute(psql_invocation, "select pg_backend_pid();\n\n").split.first
+      ids = pg_pass_file_execute(psql_invocation, "SELECT procpid FROM pg_stat_activity WHERE datname = '#{conf[:database]}' AND procpid != #{my_pid};")
+      ids.split.each do |pid|
+        pg_pass_file_execute(psql_invocation, "select pg_terminate_backend(#{pid});")
+      end
     end
   end
 
