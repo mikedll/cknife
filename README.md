@@ -252,6 +252,18 @@ Make a gem release. This will generate a commit and a tag for v0.1.2.
 
     bundle exec rake release
 
+You may also build a raw gem for testing installs without
+releasing to Rubygems publically. Use scp
+to move this .gem file to a machine you want to install
+on:
+
+    bundle exec rake build
+
+If a gem is already built, you can remove it with
+something like the following:
+
+    rm pkg/cknife-0.1.6.gem
+
 ### Invoking commands without clobbering the gemspec
 
 You can uncommente the 'gem cknife' line in the Gemfile.
