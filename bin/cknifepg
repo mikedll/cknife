@@ -43,8 +43,8 @@ class CKnifePg < Thor
         stdin.close
       end
       output = stdout.read
+      output += stderr.read
       $stdout.write output
-      $stderr.write stderr.read
       stdout.close
       stderr.close
       result = wait_thread.value.to_i
