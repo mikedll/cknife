@@ -78,7 +78,7 @@ class CKnifePg < Thor
   desc "disconnect", "Disconnect all sessions from the database. You must have a superuser configured for this to work."
   def disconnect
     with_pg_pass_file do
-      my_pid = pg_pass_file_execute(psql_invocation, "select pg_backend_pid();\n\n").split.first
+      my_pid = pg_pass_file_execute(psql_invocation, "select pg_backend_pid();").split.first
       ids = pg_pass_file_execute(psql_invocation, "SELECT procpid FROM pg_stat_activity WHERE datname = '#{conf[:database]}' AND procpid != #{my_pid};")
       ids.split.each do |pid|
         pg_pass_file_execute(psql_invocation, "select pg_terminate_backend(#{pid});")
