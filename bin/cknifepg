@@ -76,6 +76,7 @@ class CKnifePg < Thor
         say("Failed to remove pg_pass file. Please remove it for security purposes.")
       end
 
+      say
       say("Command failed.", :red) if !@session_ok
       @session_live = false
 
@@ -105,7 +106,7 @@ class CKnifePg < Thor
     end
   end
 
-  desc "sessions", "List active sessions in this database."
+  desc "sessions", "List active sessions in this database and provide a string suitable for giving to kill for stopping those sessions."
   def sessions
     with_pg_pass_file do
       my_pid = pg_pass_file_execute(psql_invocation, "select pg_backend_pid();").split.first
@@ -113,6 +114,9 @@ class CKnifePg < Thor
       table = ids_output.split.map { |line| line.split("|") }
       print_table([["PID", "Application Name"]] + table, :indent => 2)
       ids = table.map { |row| row.first }
+
+      say("If you would like to kill these sessions, you can do so with this command:")
+      say("kill -9 #{ids.join(' ')}")
     end
   end
 
@@ -138,10 +142,21 @@ class CKnifePg < Thor
     end
 
     with_pg_pass_file do
-      pg_pass_file_execute("dropdb #{connection_options} #{conf[:database]}")
-      pg_pass_file_execute("createdb #{connection_options} #{conf[:database]}")
-      pg_pass_file_execute("pg_restore --no-owner -C #{connection_options} -d #{conf[:database]} #{to_restore}") do
-        say("Restored #{to_restore}")
+      output = pg_pass_file_execute("dropdb #{connection_options} #{conf[:database]}")
+
+      if !@session_ok
+        if output.split("\n").any? { |s| s =~ /There are [0-9]+ other session\(s\) using the database./ }
+          say
+          say("Other sessions are blocking the database from being dropped.")
+          say("You may want to terminate these sessions and try again. See the 'sessions' command.")
+        end
+      else
+        say("Doing restore...")
+
+        pg_pass_file_execute("createdb #{connection_options} #{conf[:database]}")
+        pg_pass_file_execute("pg_restore --no-owner -C #{connection_options} -d #{conf[:database]} #{to_restore}") do
+          say("Restored #{to_restore}")
+        end
       end
     end
   end
