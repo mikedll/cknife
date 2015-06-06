@@ -153,8 +153,8 @@ class CKnifePg < Thor
       else
         say("Doing restore...")
 
-        pg_pass_file_execute("createdb #{connection_options} #{conf[:database]}")
-        pg_pass_file_execute("pg_restore --no-owner -C #{connection_options} -d #{conf[:database]} #{to_restore}") do
+        pg_pass_file_execute("createdb -T template0 #{connection_options} #{conf[:database]}")
+        pg_pass_file_execute("pg_restore -n public --no-privileges --no-owner #{connection_options} -d #{conf[:database]} #{to_restore}") do
           say("Restored #{to_restore}")
         end
       end
