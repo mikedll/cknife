@@ -1,15 +1,15 @@
 source "http://rubygems.org"
 
-gem "rest-client", '>= 1.6'
-gem "nokogiri", '>= 1.6'
+gem "rest-client", '>= 1.6', '~> 1'
+gem "nokogiri", '>= 1.6', '~> 1'
 gem "i18n", "~> 0.6.0"
-gem "activesupport", '>= 3.0'
-gem "actionpack", '>= 3.0'
-gem "mail"
-gem "thor", '>= 0.14'
-gem "builder", '>= 3.0'
+gem "activesupport", '~> 3'
+gem "actionpack", '~> 3'
+gem "mail", '~> 2.4'
+gem "thor", '>= 0.14', '~> 0'
+gem "builder", '~> 3.0'
 gem "fog", '>= 1.15', '<= 1.17'
-gem "unf", '>= 0.1'
+gem "unf", '>= 0.1', '~> 0'
 
 # Add dependencies to develop your gem here.
 # Include everything needed to run rake, tests, features, etc.
