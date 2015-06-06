@@ -1,5 +1,3 @@
-#!/usr/bin/env ruby
-
 require 'open3'
 require 'thor'
 require 'cknife/config'
@@ -161,5 +159,3 @@ class CKnifePg < Thor
     end
   end
 end
-
-CKnifePg.start
