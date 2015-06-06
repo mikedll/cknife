@@ -50,3 +50,5 @@ pkg
 
 tmp/*
 
+db*.dump
+
