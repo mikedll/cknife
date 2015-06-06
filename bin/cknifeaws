@@ -5,6 +5,7 @@ require 'thor'
 require 'active_support/all'
 require 'zlib'
 require 'digest/md5'
+require 'pathname'
 
 class Aws < Thor
 

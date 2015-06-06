@@ -1,4 +1,5 @@
 require 'action_view'
+require 'pathname'
 
 module CKnife
   class Formatter
