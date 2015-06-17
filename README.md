@@ -194,9 +194,13 @@ switched to DNS Simple and don't use this much anymore.
       cknifezerigo help [TASK]         # Describe available tasks or one specific task
       cknifezerigo list                # List available host names.
 
-# Postgre SQL Backups
+# PostgreSQL Backups
 
-This requires the following setup in the configuration:
+This is a wrapper around the PostgreSQL backup and restore command
+line utilities.
+
+It requires the following Rails-style configuration in the
+configuration file:
 
     pg:
       host: localhost
@@ -204,8 +208,8 @@ This requires the following setup in the configuration:
       username: dbuser
       password: dbpassword
 
-Setup Postgres credentials in a Rails-style configuration (in the same
-cknife config file) and you can capture a snapshot of your database.
+Then you can capture a snapshot of your database. You can also restore
+it using this tool.
 
     > bundle exec cknifepg help 
     Tasks:
@@ -214,6 +218,51 @@ cknife config file) and you can capture a snapshot of your database.
       cknifepg help [TASK]  # Describe available tasks or one specific task
       cknifepg restore      # Restore a file. Use the one with the most recent mtime by default. Searches for db*.dump files in the CWD.
       cknifepg sessions     # List active sessions in this database and provide a string suitable for giving to kill for stopping those sessions.
+
+This generates and deletes a `.pgpass` file before and after the
+command line session. Be aware that if this process is interrupted,
+the `.pgpass` file may be left on disk in the CWD.
+
+# MySQL Backups
+
+Like pg, this requires a similar setup in the configuration:
+
+    mysql:
+      host: localhost
+      database: dbname
+      username: dbuser
+      password: dbpassword
+
+Then you can capture a snapshot of your database.
+
+    > bundle exec cknifemysql help 
+    Tasks:
+      cknifemysql capture      # Capture a dump of the database to db(current timestamp).sql.
+      cknifemysql help [TASK]  # Describe available tasks or one specific task
+      cknifemysql restore      # Restore a file. Use the one with the most recent mtime by default. Searches for db*.sql files in the CWD.
+
+Sample output:
+
+    > bundle exec cknifemysql capture 
+    mysqldump --defaults-file=my.cnf -h localhost -P 3306 -u dbuser dbname --add-drop-database --result-file=db20150617125335.sql
+    Captured db20150617125335.sql.
+
+And the accompanying restore, were you to run it immediately afterwards:
+
+    > bundle exec cknifemysql restore 
+    Restore db20150617125335.sql? y
+    Doing restore...
+    mysql --defaults-file=my.cnf -h localhost -P 3306 -u dbuser dbname
+    source db20150617125335.sql;
+    Restored db20150617125335.sql
+
+**Important:** As you can see, a my.cnf is generated and your password
+stored in there. That file is removed when the command is done
+executing.  This keeps your password off of the command line and
+hidden from certain `top` or `ps` invocations by other users who may
+be on the same machine. This rational is taken from the PostgreSQL
+PGPASSFILE documentation. If this command error's-out, you'll be
+warned to remove this file yourself for security purposes.
 
 # Dub
 
