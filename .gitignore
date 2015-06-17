@@ -51,4 +51,5 @@ pkg
 tmp/*
 
 db*.dump
+db*.sql
 

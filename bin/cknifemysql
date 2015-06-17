@@ -1,0 +1,5 @@
+#!/usr/bin/env ruby
+
+require 'cknife/cknife_mysql'
+
+CKnife::CKnifeMysql.start
