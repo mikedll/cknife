@@ -35,7 +35,7 @@ module CKnife
 
     end
 
-    desc "capture", "Capture a dump of the database to db(current timestamp).dump."
+    desc "capture", "Capture a dump of the database to db(current timestamp).sql."
     def capture
       file_name = "db" + Time.now.strftime("%Y%m%d%H%M%S") + ".sql"
 
