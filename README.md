@@ -233,6 +233,8 @@ Options:
 
 # A typical cron script for capturing PostgreSQL backups and uploading them to S3
 
+    #!/bin/bash
+    
     source "$HOME/.rvm/scripts/rvm";
 
     rvm use 2.0.0;
