@@ -294,6 +294,8 @@ Options:
 
     cknifeaws upsync backups-bucket . --noprompt --backups-retain --glob="db*.dump";
 
+    find -mtime +7 -iname "*.dump" -delete
+    
 Which can be used with the following sample [crontab](http://en.wikipedia.org/wiki/Cron#Examples),
 executing once a day at 2am:
 
