@@ -210,7 +210,7 @@ class Aws < Thor
       }.last
 
       [f.key,
-       "#{(f.content_length.to_f / unit_to_mult[matching]).round(2)}#{matching}",
+       "#{f.content_length == 0 ? 0 : (f.content_length.to_f / unit_to_mult[matching]).round(2)}#{matching}",
        f.content_type,
        f.last_modified
       ]
