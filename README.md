@@ -208,6 +208,10 @@ configuration file:
       username: dbuser
       password: dbpassword
 
+**Warning:** do not use a colon in your password, or the password
+configuration will not work. This is a shortcoming of this project and
+a consequence of the `.pgpass` file format used by PostgreSQL.
+
 Then you can capture a snapshot of your database. You can also restore
 it using this tool.
 
