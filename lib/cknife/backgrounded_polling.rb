@@ -14,6 +14,9 @@ require 'active_support/concern'
 #  consecutive_error_count
 #
 # And implement a loop that calls poll_background.
+# This is optional:
+#
+#  payload
 #
 module CKnife
   module BackgroundedPolling
@@ -25,13 +28,17 @@ module CKnife
     BACKGROUND_POLL = 'background_poll'
 
     included do
+      def payload
+        {}
+      end
+
       def poll_background
         if active && (last_polled_at.nil? || (last_polled_at < Time.now - 15.minutes))
           before_poll
           self.last_error = ""
 
           begin
-            result = RestClient.put target_endpoint, :params => {} do |response, request, result|
+            result = RestClient.put(target_endpoint, payload) do |response, request, result|
               if ![200, 201].include?(response.net_http_res.code.to_i)
                 self.last_error = "Unexpected HTTP Result: #{response.net_http_res.code.to_i}"
               else
