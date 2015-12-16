@@ -53,3 +53,5 @@ tmp/*
 db*.dump
 db*.sql
 
+cknife_monitor.log
+cknife_monitor.pid
