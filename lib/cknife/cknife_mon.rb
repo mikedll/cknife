@@ -32,7 +32,10 @@ module CKnife
             :proc => p,
             :ARGV => ["start"],
             :logfilename => "output.log",
-            :output_logfilename => "output.log"
+            :output_logfilename => "output.log",
+            :dir_mode => :normal,
+            :dir => File.expand_path('.')
+
           }
           @group ||= Daemons::ApplicationGroup.new(options[:app_name], options)
 
@@ -44,16 +47,26 @@ module CKnife
       end
     end
 
-    desc "start", "Start daemon."
+    desc "start", "Start monitor."
     def start
       say("Starting.")
       daemonized_task.start
     end
 
-    desc "stop", "Stop daemon"
+    desc "status", "Show status of monitor."
+    def status
+      daemonized_task.show_status
+    end
+
+    desc "stop", "Stop monitor."
     def stop
-      say("Stopped.")
+      if !daemonized_task.running?
+        say("Not running.", :red)
+        return
+      end
+
       daemonized_task.stop
+      say("Stopped.")
     end
   end
 end
