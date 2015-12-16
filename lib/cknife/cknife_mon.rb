@@ -16,13 +16,15 @@ module CKnife
       end
 
       def daemonized_task
+        conf # cache file before we lose descriptor
+
         if @daemonized_task.nil?
 
           p = proc do
             while true
               sleep 4
-              puts "*************** #{__FILE__} #{__LINE__} *************"
-              puts "pinging."
+              # RestClient.put conf[:url]
+              puts "Pinged home url."
             end
           end
 
@@ -31,11 +33,9 @@ module CKnife
             :mode => :proc,
             :proc => p,
             :ARGV => ["start"],
-            :logfilename => "output.log",
-            :output_logfilename => "output.log",
+            :log_output => true,
             :dir_mode => :normal,
             :dir => File.expand_path('.')
-
           }
           @group ||= Daemons::ApplicationGroup.new(options[:app_name], options)
 
