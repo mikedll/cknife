@@ -32,7 +32,6 @@ module CKnife
       def command_line
         @command_line ||= CommandLine.new(option_file, "[client]\npassword=\"#{conf[:password]}\"", self)
       end
-
     end
 
     desc "capture", "Capture a dump of the database to db(current timestamp).sql."

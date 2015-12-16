@@ -1,18 +1,30 @@
 
-[![Gem Version](https://badge.fury.io/rb/cknife.svg)](http://badge.fury.io/rb/cknife)
-
 # Overview
 
-Cali Army Knife, or cknife, is a collection of command line tools.
-It's written in Ruby with Thor, and packaged as a Ruby gem.  It
-depends on the Fog gem for all of it's S3 operations.
+Please pay a fee to use this software. I'm Michael Rivera, its owner,
+available at mrivera@michaelriveraco.com.
+
+Cali Army Knife, cknife, is a collection of command line tools
+implemented with Thor.
 
 # Installation
 
-Has been tested successfully on Rubies >= 1.9.2 with activesupport >= 3.
+This can be done after you purchase the software.
+
+The gem has been used with Rubies >= 1.9.2 and activesupport >= 3.
+
+1. Install ruby:
 
     > \curl -sSL https://get.rvm.io | bash -s stable --ruby
-    > gem install cknife
+
+2. Create a Gemfile with cknife and its git repository. Run bundle.
+
+The above instructions have not been tested.
+
+# Computer Monitor
+
+This sends out a PUT request every fifteen minutes to a server
+you configure.
 
 # Amazon Web Services (AWS) Command Line Interface
 
@@ -319,6 +331,10 @@ executing once a day at 2am:
 
 ### Making a release
 
+This section is outdated as of December 15th, 2015. It has
+to be updated to reflect that this will not be hosted on
+Rubygems.
+
 One of the following, like patch. This will create a git commit.
 
     bundle exec rake version:bump:major
@@ -351,9 +367,12 @@ something like the following:
 
 You can uncommente the 'gem cknife' line in the Gemfile.
 
-This allows you to test your changes without having to run `rake
-install` if you don't want to, after every file edit.
+Then you can invoke the executables as you work on them.
 
-Don't generate the gemspec with this on, though, or it'll be a self-dependency
-which isn't really what we want.
+Do not generate the .gemspec with this line uncommented, or
+you'll create a self-dependency in this gem.
+
+Run bundle after uncommenting the line then use `bundle exec cmd`
+to invoke a given command named "cmd".
+
 
