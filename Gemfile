@@ -10,6 +10,7 @@ gem "thor", '>= 0.14', '~> 0'
 gem "builder", '~> 3.0'
 gem "fog", '>= 1.15', '<= 1.17'
 gem "unf", '>= 0.1', '~> 0'
+gem "daemons"
 
 # Add dependencies to develop your gem here.
 # Include everything needed to run rake, tests, features, etc.

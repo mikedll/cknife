@@ -20,6 +20,7 @@ GEM
       multi_json (~> 1.0)
     addressable (2.3.6)
     builder (3.0.4)
+    daemons (1.2.3)
     descendants_tracker (0.0.4)
       thread_safe (~> 0.3, >= 0.3.1)
     erubis (2.7.0)
@@ -117,6 +118,7 @@ DEPENDENCIES
   activesupport (~> 3)
   builder (~> 3.0)
   bundler (~> 1.0)
+  daemons
   fog (>= 1.15, <= 1.17)
   i18n (~> 0)
   jeweler (~> 2.0)
