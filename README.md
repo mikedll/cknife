@@ -21,10 +21,28 @@ The gem has been used with Rubies >= 1.9.2 and activesupport >= 3.
 
 The above instructions have not been tested.
 
-# Computer Monitor
+# Monitor
 
 This sends out a PUT request every fifteen minutes to a server
 you configure.
+
+    > bundle exec cknifemon 
+    Tasks:
+      cknifemon help [TASK]  # Describe available tasks or one specific task
+      cknifemon restart      # Restart monitor.
+      cknifemon start        # Start monitor.
+      cknifemon status       # Show status of monitor.
+      cknifemon stop         # Stop monitor.
+
+It is designed to work with M. Rivera CRM, but you can configure the
+url to be any endpoint for your own monitoring purposes. You can
+configure alerts on the server that you create as the target endpoint
+of the monitor.
+
+The configuration is as follows:
+
+    mon:
+      url: http://some.server.com/monitored_computers/heartbeat
 
 # Amazon Web Services (AWS) Command Line Interface
 

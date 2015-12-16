@@ -26,7 +26,7 @@ module CKnife
 
     included do
       def poll_background
-        if active && (last_polled_at.nil? || (last_polled_at < Time.now - 10.seconds))
+        if active && (last_polled_at.nil? || (last_polled_at < Time.now - 15.minutes))
           before_poll
           self.last_error = ""
 
