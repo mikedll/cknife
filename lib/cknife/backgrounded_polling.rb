@@ -38,7 +38,7 @@ module CKnife
           self.last_error = ""
 
           begin
-            result = RestClient.put(target_endpoint, payload) do |response, request, result|
+            result = RestClient.post(target_endpoint, payload) do |response, request, result|
               if ![200, 201].include?(response.net_http_res.code.to_i)
                 self.last_error = "Unexpected HTTP Result: #{response.net_http_res.code.to_i}"
               else
@@ -52,10 +52,10 @@ module CKnife
           if !last_error.blank?
             self.consecutive_error_count += 1
             self.active = false if consecutive_error_count >= Repetition::MAX_CONSECUTIVE
-            puts "Failed to ping home url. Last error: #{last_error}."
+            puts "#{Time.now}: Failed to ping home url. Last error: #{last_error}."
           else
             self.consecutive_error_count = 0
-            puts "Pinged home url with result #{last_result}."
+            puts "#{Time.now}: Pinged home url with result #{last_result}."
           end
 
           self.last_polled_at = Time.now

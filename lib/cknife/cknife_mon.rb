@@ -17,12 +17,13 @@ module CKnife
 
       def conf
         @conf ||= {
-          :url => config['mon.url']
+          :url => config['mon.url'],
+          :api_key => config['mon.api_key']
         }
       end
 
       def monitor
-        @monitor ||= CKnife::Monitor.new(conf[:url])
+        @monitor ||= CKnife::Monitor.new(conf[:url], :api_key => conf[:api_key])
       end
 
       def daemonized_task

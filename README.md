@@ -43,6 +43,7 @@ The configuration is as follows:
 
     mon:
       url: http://some.server.com/monitored_computers/heartbeat
+      api_key: someapikey
 
 # Amazon Web Services (AWS) Command Line Interface
 

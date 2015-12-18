@@ -4,6 +4,7 @@ secret: 8xILhOsecretsecretsecretsecret...
 
 mon:
   url: http://some.server.com/monitored_computers/heartbeat
+  api_key: someapikey
 
 mail:
   from: me@mydomain.com
