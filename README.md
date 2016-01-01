@@ -13,20 +13,20 @@ This can be done after you purchase the software.
 
 The gem has been used with Rubies >= 1.9.2 and activesupport >= 3.
 
-1. Install ruby and possibly bundler:
+Install ruby and possibly bundler:
 
-    \curl -sSL https://get.rvm.io | bash -s stable --ruby
-    gem install bundler
+    > \curl -sSL https://get.rvm.io | bash -s stable --ruby
+    > gem install bundler
 
-2. Create a Gemfile with cknife and its git repository.
+Create a Gemfile with cknife and its git repository.
 
     source "http://rubygems.org"
     
     gem "cknife", :git => "https://github.com/mikedll/cali-army-knife.git"
 
-3. Run bundle.
+Run bundle.
 
-    bundle
+    > bundle
 
 # Monitor
 
