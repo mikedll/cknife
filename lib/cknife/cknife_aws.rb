@@ -438,6 +438,30 @@ class CKnifeAws < Thor
     say("Done. #{cn} created. #{un} updated. #{sn} local skipped. #{dn} deleted remotely. #{spn} retained remotely.")
   end
 
+  desc "fdelete [BUCKET_NAME] [FILE_NAME]", "Delete a file in a bucket."
+  method_options :region => "us-east-1"
+  def fdelete(bucket_name, file_name)
+    d = fog_storage.directories.select { |d| d.key == bucket_name }.first
+
+    if d.nil?
+      say ("Found no bucket by name #{bucket_name}")
+      return
+    end
+
+    f = d.files.select { |f| f.key == file_name }.first
+    if f.nil?
+      say("Found no file in #{d.key} having name #{file_name}.")
+      return
+    end
+
+    if yes?("Are you sure you want to delete #{f.key} in #{d.key}?", :red)
+      f.destroy
+      say "Destroyed #{f.key} in #{d.key}."
+    else
+      say "No action taken."
+    end
+  end
+
   desc "delete [BUCKET_NAME]", "Destroy a bucket"
   method_options :region => "us-east-1"
   def delete(bucket_name)
