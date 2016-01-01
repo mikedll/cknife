@@ -15,8 +15,8 @@ The gem has been used with Rubies >= 1.9.2 and activesupport >= 3.
 
 1. Install ruby and possibly bundler:
 
-    > \curl -sSL https://get.rvm.io | bash -s stable --ruby
-    > gem install bundler
+    \curl -sSL https://get.rvm.io | bash -s stable --ruby
+    gem install bundler
 
 2. Create a Gemfile with cknife and its git repository.
 
@@ -26,7 +26,7 @@ The gem has been used with Rubies >= 1.9.2 and activesupport >= 3.
 
 3. Run bundle.
 
-    > bundle
+    bundle
 
 # Monitor
 
