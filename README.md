@@ -354,7 +354,10 @@ executing once a day at 2am:
     0 2 * * *  path/to/script > /dev/null
 
 
-# Contributing
+# Developing
+
+While the source to this project is open, I ask that you
+pay me to use it. This includes forking its source code.
 
 ### Making a release
 
