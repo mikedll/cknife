@@ -96,12 +96,6 @@ class CKnifeAws < Thor
       yield d
     end
 
-    def fog_key_for(target_root, file_path)
-      target_root_path_length ||= target_root.to_s.length + "/".length
-      relative = file_path[ target_root_path_length, file_path.length]
-      relative
-    end
-
     def s3_download(s3_file)
       dir_path = Pathname.new(s3_file.key).dirname
       dir_path.mkpath
@@ -335,7 +329,7 @@ class CKnifeAws < Thor
 
         files.each do |to_upload|
           say("#{to_upload} (no output if skipped)...")
-          k = fog_key_for(target_root, to_upload)
+          k = File.basename(to_upload)
 
           existing_head = d.files.head(k)
 
