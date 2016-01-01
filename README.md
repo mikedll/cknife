@@ -17,7 +17,15 @@ The gem has been used with Rubies >= 1.9.2 and activesupport >= 3.
 
     > \curl -sSL https://get.rvm.io | bash -s stable --ruby
 
-2. Create a Gemfile with cknife and its git repository. Run bundle.
+2. Create a Gemfile with cknife and its git repository.
+
+    source "http://rubygems.org"
+    
+    gem "cknife", :git => "https://github.com/mikedll/cali-army-knife.git"
+
+3. Run bundle.
+
+    bundle
 
 The above instructions have not been tested.
 
