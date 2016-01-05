@@ -48,6 +48,7 @@ pkg
 # For rubinius:
 #*.rbc
 
+tmp/**/*
 tmp/*
 
 db*.dump
@@ -55,3 +56,7 @@ db*.sql
 
 cknife_monitor.log
 cknife_monitor.pid
+
+cknife.yml
+
+
