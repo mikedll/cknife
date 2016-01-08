@@ -15,12 +15,12 @@ require 'jeweler'
 Jeweler::Tasks.new do |gem|
   # gem is a Gem::Specification... see http://guides.rubygems.org/specification-reference/ for more options
   gem.name = "cknife"
-  gem.homepage = "http://github.com/mikedll/cali-army-knife"
-  gem.license = "MIT"
-  gem.summary = "Cali Army Knife"
-  gem.description = "Cali Army Knife, a collection of command line tools, especially for popular API services."
-  gem.email = "mikedll@mikedll.com"
-  gem.authors = ["Mike De La Loza"]
+  gem.homepage = "http://github.com/mikedll/cknife"
+  gem.license = ""
+  gem.summary = "CKnife"
+  gem.description = "A collection of command line tools, especially for popular API services."
+  gem.email = "mrivera@michaelriveraco.com"
+  gem.authors = ["Michael Rivera"]
   # dependencies defined in Gemfile
 end
 Jeweler::RubygemsDotOrgTasks.new
