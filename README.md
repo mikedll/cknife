@@ -56,20 +56,21 @@ The configuration is as follows:
 
     > bundle exec cknifeaws help 
     Tasks:
-      cknifeaws afew [BUCKET_NAME]                 # Show first 5 files in bucket
-      cknifeaws create [BUCKET_NAME]               # Create a bucket
-      cknifeaws create_cloudfront [BUCKET_NAME]    # Create a cloudfront distribution (a CDN)
-      cknifeaws delete [BUCKET_NAME]               # Destroy a bucket
-      cknifeaws download [BUCKET_NAME]             # Download all files in a bucket to CWD. Or one file.
-      cknifeaws fdelete [BUCKET_NAME] [FILE_NAME]  # Delete a file in a bucket.
-      cknifeaws help [TASK]                        # Describe available tasks or one specific task
-      cknifeaws list                               # Show all buckets
-      cknifeaws list_cloudfront                    # List cloudfront distributions (CDNs)
-      cknifeaws list_servers                       # Show all servers
-      cknifeaws show [BUCKET_NAME]                 # Show info about bucket
-      cknifeaws start_server [SERVER_ID]           # Start a given EC2 server
-      cknifeaws stop_server [SERVER_ID]            # Stop a given EC2 server (does not terminate it)
-      cknifeaws upsync [BUCKET_NAME] [DIRECTORY]   # Push local files matching glob PATTERN into bucket. Ignore unchanged files.
+      cknifeaws afew [BUCKET_NAME]                  # Show first 5 files in bucket
+      cknifeaws create [BUCKET_NAME]                # Create a bucket
+      cknifeaws create_cloudfront [BUCKET_NAME]     # Create a cloudfront distribution (a CDN)
+      cknifeaws delete [BUCKET_NAME]                # Destroy a bucket
+      cknifeaws download [BUCKET_NAME]              # Download all files in a bucket to CWD. Or one file.
+      cknifeaws fdelete [BUCKET_NAME] [FILE_NAME]   # Delete a file in a bucket.
+      cknifeaws fupload [BUCKET_NAME] [LOCAL_FILE]  # Upload a file to a bucket. Path to file is ignored.
+      cknifeaws help [TASK]                         # Describe available tasks or one specific task
+      cknifeaws list                                # Show all buckets
+      cknifeaws list_cloudfront                     # List cloudfront distributions (CDNs)
+      cknifeaws list_servers                        # Show all servers
+      cknifeaws show [BUCKET_NAME]                  # Show info about bucket
+      cknifeaws start_server [SERVER_ID]            # Start a given EC2 server
+      cknifeaws stop_server [SERVER_ID]             # Stop a given EC2 server (does not terminate it)
+      cknifeaws upsync [BUCKET_NAME] [DIRECTORY]    # Push local files matching glob PATTERN into bucket. Ignore unchanged files.
 
 ### AWS Key and Secret Configuration
 

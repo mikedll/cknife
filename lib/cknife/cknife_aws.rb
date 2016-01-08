@@ -115,6 +115,19 @@ class CKnifeAws < Thor
       md5.hexdigest
     end
 
+    def fresh_file_upload(to_upload, d, key, is_public)
+      File.open(to_upload) do |localfile|
+        file = d.files.create(
+                              :key    => key,
+                              :public => is_public,
+                              :body => ""
+                              )
+        file.metadata = { LOCAL_MOD_KEY => localfile.mtime.to_s }
+        file.multipart_chunk_size = FILE_BUFFER_SIZE # creates multipart_save
+        file.body = localfile
+        file.save
+      end
+    end
   end
 
   desc "list_servers", "Show all servers"
@@ -195,9 +208,6 @@ class CKnifeAws < Thor
       'M' => 2**20,
       'G' => 2**30
     }
-
-    puts "*************** #{__FILE__} #{__LINE__} *************"
-    puts "beginning to iterate over other things."
 
     found.map { |f|
       matching = unit_to_mult.keys.select { |k|
@@ -364,17 +374,7 @@ class CKnifeAws < Thor
             un += 1
           elsif existing_head.nil?
             if !options[:dry_run]
-              File.open(to_upload) do |localfile|
-                file = d.files.create(
-                                      :key    => k,
-                                      :public => options[:public],
-                                      :body => ""
-                                      )
-                file.metadata = { LOCAL_MOD_KEY => localfile.mtime.to_s }
-                file.multipart_chunk_size = FILE_BUFFER_SIZE # creates multipart_save
-                file.body = localfile
-                file.save
-              end
+              fresh_file_upload(to_upload, d, k, options[:public])
             end
             say("created.")
             cn += 1
@@ -460,6 +460,35 @@ class CKnifeAws < Thor
     else
       say "No action taken."
     end
+  end
+
+  desc "fupload [BUCKET_NAME] [LOCAL_FILE]", "Upload a file to a bucket. Path to file is ignored."
+  method_options :public => false
+  method_options :region => "us-east-1"
+  def fupload(bucket_name, file_name)
+    d = fog_storage.directories.select { |d| d.key == bucket_name }.first
+
+    if d.nil?
+      say ("Found no bucket by name #{bucket_name}")
+      return
+    end
+
+    if !File.exists?(file_name)
+      say("Found no such file #{file_name} on the local disk.")
+      return
+    end
+
+    key = File.basename(file_name)
+    f = d.files.select { |f| f.key == key }.first
+    if !f.nil? && !yes?("There is already a file named #{key} in #{d.key}. Do you want to overwrite it with this upload?", :red)
+      say("No action taken.")
+      return
+      f.destroy
+      say "Destroyed #{f.key} in #{d.key}."
+    end
+
+    fresh_file_upload(file_name, d, key, options[:public])
+    say "Uploaded #{key} to #{d.key}."
   end
 
   desc "delete [BUCKET_NAME]", "Destroy a bucket"
