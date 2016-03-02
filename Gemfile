@@ -3,8 +3,8 @@ source "http://rubygems.org"
 gem "rest-client", '>= 1.6', '~> 1'
 gem "nokogiri", '>= 1.6', '~> 1'
 gem "i18n", "~> 0"
-gem "activesupport", '~> 3'
-gem "actionpack", '~> 3'
+gem "activesupport", '> 3'
+gem "actionpack", '> 3'
 gem "mail", '~> 2.4'
 gem "thor", '>= 0.14', '~> 0'
 gem "builder", '~> 3.0'

@@ -114,8 +114,8 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  actionpack (~> 3)
-  activesupport (~> 3)
+  actionpack (> 3)
+  activesupport (> 3)
   builder (~> 3.0)
   bundler (~> 1.0)
   daemons
