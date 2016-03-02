@@ -375,8 +375,7 @@ One of the following, like patch. This will create a git commit.
 Create the gem spec.
 
     bundle exec rake gemspec:generate
-    git add -A
-    git commit -m "Generated gemspec for version 0.1.4"
+    git commit -am "Generated gemspec for version 0.1.4"
 
 Do not run `rake release` anymore. For now, we are not deploying
 this gem to Rubygems.
