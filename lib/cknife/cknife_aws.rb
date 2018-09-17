@@ -1,4 +1,4 @@
-require 'fog'
+require 'fog/aws'
 require 'thor'
 require 'active_support/all'
 require 'zlib'
@@ -439,6 +439,7 @@ class CKnifeAws < Thor
   end
 
   desc "fdelete [BUCKET_NAME] [FILE_NAME]", "Delete a file in a bucket."
+  method_options :noprompt => false
   method_options :region => "us-east-1"
   def fdelete(bucket_name, file_name)
     d = fog_storage.directories.select { |d| d.key == bucket_name }.first
@@ -454,7 +455,7 @@ class CKnifeAws < Thor
       return
     end
 
-    if yes?("Are you sure you want to delete #{f.key} in #{d.key}?", :red)
+    if options[:noprompt] || yes?("Are you sure you want to delete #{f.key} in #{d.key}?", :red)
       f.destroy
       say "Destroyed #{f.key} in #{d.key}."
     else
@@ -492,6 +493,7 @@ class CKnifeAws < Thor
   end
 
   desc "delete [BUCKET_NAME]", "Destroy a bucket"
+  method_options :noprompt => false
   method_options :region => "us-east-1"
   def delete(bucket_name)
     d = fog_storage.directories.select { |d| d.key == bucket_name }.first
@@ -506,7 +508,7 @@ class CKnifeAws < Thor
       return
     end
 
-    if yes?("Are you sure you want to delete this bucket #{d.key}?", :red)
+    if options[:noprompt] || yes?("Are you sure you want to delete this bucket #{d.key}?", :red)
       d.destroy
       say "Destroyed bucket named #{bucket_name}."
       show_buckets
