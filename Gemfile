@@ -8,7 +8,7 @@ gem "actionpack", '> 3'
 gem "mail", '~> 2.4'
 gem "thor", '>= 0.14', '~> 0'
 gem "builder", '~> 3.0'
-gem "fog-aws"
+gem "fog-aws", '< 3.0'
 gem "unf", '>= 0.1', '~> 0'
 gem "daemons"
 
