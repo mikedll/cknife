@@ -17,9 +17,11 @@ Install ruby and possibly bundler:
 
 Create a Gemfile with cknife and its git repository.
 
+
     source "http://rubygems.org"
-    
-    gem "cknife", :git => "https://github.com/mikedll/cknife.git"
+    git_source(:github) { |repo| "https://github.com/#{repo}.git" }
+
+    gem "cknife", '~> 1.1.0'
 
 Run bundle.
 
