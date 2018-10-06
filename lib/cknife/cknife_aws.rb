@@ -71,6 +71,37 @@ class CKnifeAws < Thor
       @cdn ||= Fog::CDN.new(fog_opts)
     end
 
+    def get_bucket(bucket_name)
+      d = fog_storage.directories.select { |d| d.key == bucket_name }.first
+
+      if d.nil?
+        say ("Found no bucket by name #{bucket_name}")
+        return
+      end
+      d
+    end
+
+    def get_file(bucket, file_name)
+      f = bucket.files.select { |f| f.key == file_name }.first
+      if f.nil?
+        say("Found no file in #{bucket.key} having name #{file_name}.")
+        return
+      end
+      f
+    end
+
+    def get_bucket_and_file(bucket_name, file_name)
+      d = get_bucket(bucket_name)
+      return [nil, nil] if d.nil?
+
+      f = get_file(d, file_name)
+      return [nil, nil] if f.nil?
+
+      [d, f]
+    end
+
+
+
     def show_buckets
       fog_storage.directories.sort { |a,b| a.key <=> b.key }.each { |b| puts "#{b.key}" }
     end
@@ -196,15 +227,26 @@ class CKnifeAws < Thor
     show_buckets
   end
 
+  desc "url [BUCKET_NAME] [FILE]", "Generate a temporary (15 minute) URL for a file."
+  method_options :region => "us-east-1"
+  method_options :duration => 15
+  def url(bucket_name, file_name)
+    d, f = get_bucket_and_file(bucket_name, file_name)
+    return if d.nil? || f.nil?
+
+    minutes = options[:duration].to_i
+    expiry = (Time.now + minutes.minutes).to_i
+    url = f.url(expiry, path_style: true)
+    say("URL created.")
+    say(url)
+  end
+
   desc "afew [BUCKET_NAME]", "Show first 5 files in bucket"
   method_options :count => "5"
   method_options :glob => "*"
   def afew(bucket_name)
-    d = fog_storage.directories.select { |d| d.key == bucket_name }.first
-    if d.nil?
-      say ("Found no bucket by name #{bucket_name}")
-      return
-    end
+    d = get_bucket(bucket_name)
+    return if d.nil?
 
     found = n_file_heads(d, options[:glob], options[:count].to_i)
 
@@ -448,18 +490,8 @@ class CKnifeAws < Thor
   method_options :noprompt => false
   method_options :region => "us-east-1"
   def fdelete(bucket_name, file_name)
-    d = fog_storage.directories.select { |d| d.key == bucket_name }.first
-
-    if d.nil?
-      say ("Found no bucket by name #{bucket_name}")
-      return
-    end
-
-    f = d.files.select { |f| f.key == file_name }.first
-    if f.nil?
-      say("Found no file in #{d.key} having name #{file_name}.")
-      return
-    end
+    d, f = get_bucket_and_file(bucket_name, file_name)
+    return if d.nil? || f.nil?
 
     if options[:noprompt] || yes?("Are you sure you want to delete #{f.key} in #{d.key}?", :red)
       f.destroy

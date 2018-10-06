@@ -78,9 +78,10 @@ Setup your AWS key and secret in any of these methods, in order of priority:
   - $CWD/cknife.yml
   - $CWD/tmp/cknife.yml
   - environment variables: `KEY`, `SECRET`
-  - environment variablse: `AMAZON_ACCESS_KEY_ID`, `AMAZON_SECRET_ACCESS_KEY` 
+  - environment variables: `AMAZON_ACCESS_KEY_ID`, `AMAZON_SECRET_ACCESS_KEY` 
 
-The format of your cknife.yml must be like so:
+If using one of the above cknife.yml files to define your keys, the format
+is as follows:
 
     ---
     key: AKIAblahblahb...
