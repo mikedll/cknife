@@ -19,7 +19,7 @@ Jeweler::Tasks.new do |gem|
   gem.license = ""
   gem.summary = "CKnife"
   gem.description = "A collection of command line tools, especially for popular API services."
-  gem.email = "mrivera@michaelriveraco.com"
+  gem.email = "soymrmike@gmail.com"
   gem.authors = ["Michael Rivera"]
   # dependencies defined in Gemfile
 end

@@ -1,17 +1,14 @@
 
 # Overview
 
-Please pay a fee to use this software. I'm Michael Rivera, its owner,
-available at mrivera@michaelriveraco.com.
+cknife has command line tools written in Ruby. They're supposed
+to help with some system administration tasks.
 
-Cali Army Knife, cknife, is a collection of command line tools
-implemented with Thor.
+# Requirements
+
+Ruby >= 2.1.
 
 # Installation
-
-This can be done after you purchase the software.
-
-The gem has been used with Rubies >= 1.9.2 and activesupport >= 3.
 
 Install ruby and possibly bundler:
 
@@ -22,7 +19,7 @@ Create a Gemfile with cknife and its git repository.
 
     source "http://rubygems.org"
     
-    gem "cknife", :git => "https://github.com/mikedll/cali-army-knife.git"
+    gem "cknife", :git => "https://github.com/mikedll/cknife.git"
 
 Run bundle.
 
@@ -355,16 +352,7 @@ executing once a day at 2am:
     0 2 * * *  path/to/script > /dev/null
 
 
-# Developing
-
-While the source to this project is open, I ask that you
-pay me to use it. This includes forking its source code.
-
 ### Making a release
-
-This section is outdated as of December 15th, 2015. It has
-to be updated to reflect that this will not be hosted on
-Rubygems.
 
 One of the following, like patch. This will create a git commit.
 
@@ -377,8 +365,8 @@ Create the gem spec.
     bundle exec rake gemspec:generate
     git commit -am "Generated gemspec for version 0.1.4"
 
-Do not run `rake release` anymore. For now, we are not deploying
-this gem to Rubygems.
+You can `rake release`... I think that deploys
+the gem to Rubygems.
 
 You may build a local gem:
 

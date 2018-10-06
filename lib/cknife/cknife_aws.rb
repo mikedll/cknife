@@ -1,4 +1,4 @@
-require 'fog'
+require 'fog/aws'
 require 'thor'
 require 'active_support/all'
 require 'zlib'
@@ -128,6 +128,21 @@ class CKnifeAws < Thor
         file.save
       end
     end
+
+    def n_file_heads(directory, glob=nil, max=30)
+      found = []
+
+      n = 0
+      directory.files.each do |f|
+        if glob.nil? || File.fnmatch(glob, f.key)
+          found.push(directory.files.head(f.key))
+          break if n >= max
+          n += 1
+        end
+      end
+
+      found
+    end
   end
 
   desc "list_servers", "Show all servers"
@@ -191,16 +206,7 @@ class CKnifeAws < Thor
       return
     end
 
-    found = []
-
-    i = 0
-    d.files.each do |f|
-      if File.fnmatch(options[:glob], f.key)
-        found.push(d.files.head(f.key))
-        break if i >= options[:count].to_i
-        i += 1
-      end
-    end
+    found = n_file_heads(d, options[:glob], options[:count].to_i)
 
     unit_to_mult = {
       'B' => 1,
@@ -439,6 +445,7 @@ class CKnifeAws < Thor
   end
 
   desc "fdelete [BUCKET_NAME] [FILE_NAME]", "Delete a file in a bucket."
+  method_options :noprompt => false
   method_options :region => "us-east-1"
   def fdelete(bucket_name, file_name)
     d = fog_storage.directories.select { |d| d.key == bucket_name }.first
@@ -454,7 +461,7 @@ class CKnifeAws < Thor
       return
     end
 
-    if yes?("Are you sure you want to delete #{f.key} in #{d.key}?", :red)
+    if options[:noprompt] || yes?("Are you sure you want to delete #{f.key} in #{d.key}?", :red)
       f.destroy
       say "Destroyed #{f.key} in #{d.key}."
     else
@@ -492,7 +499,9 @@ class CKnifeAws < Thor
   end
 
   desc "delete [BUCKET_NAME]", "Destroy a bucket"
+  method_options :noprompt => false
   method_options :region => "us-east-1"
+  method_options :deep => false
   def delete(bucket_name)
     d = fog_storage.directories.select { |d| d.key == bucket_name }.first
 
@@ -501,12 +510,24 @@ class CKnifeAws < Thor
       return
     end
 
-    if d.files.length > 0
-      say "Bucket has #{d.files.length} files. Please empty before destroying."
-      return
-    end
+    if options[:noprompt] || yes?("Are you sure you want to delete this bucket #{d.key}?", :red)
 
-    if yes?("Are you sure you want to delete this bucket #{d.key}?", :red)
+      if d.files.length > 0
+        if !options[:deep]
+          say "Bucket has #{d.files.length} files. Please empty before destroying."
+          return
+        end
+
+        found = n_file_heads(d)
+        while found.length > 0
+          found.each do |f|
+            f.destroy
+            say("Deleted file #{f.key}.")
+          end
+          found = n_file_heads(d)
+        end
+      end
+
       d.destroy
       say "Destroyed bucket named #{bucket_name}."
       show_buckets
