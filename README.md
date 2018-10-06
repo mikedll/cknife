@@ -360,13 +360,19 @@ One of the following, like patch. This will create a git commit.
     bundle exec rake version:bump:minor
     bundle exec rake version:bump:patch
 
-Create the gem spec.
+Do a git flow release. Create the gem spec and commit it:
 
     bundle exec rake gemspec:generate
     git commit -am "Generated gemspec for version 0.1.4"
 
-You can `rake release`... I think that deploys
-the gem to Rubygems.
+Do a git flow finish release. Push to github. You can
+then do a release to Rubygems. This command will
+try to generate the gemspec, but nothing will happen
+since the gemspec is already valid.
+
+    rake release
+
+### Building Locally (Optional)
 
 You may build a local gem:
 
