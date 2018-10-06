@@ -1,5 +1,6 @@
 require 'action_view'
 require 'pathname'
+require 'yaml'
 
 module CKnife
   class Formatter
@@ -29,7 +30,7 @@ module CKnife
         begin
           @config.merge!(YAML.load(config_file.read))
         rescue
-          say ("Found, but could not parse config: #{config_file}")
+          puts "Found, but could not parse config: #{config_file}"
         end
       end
 

@@ -67,7 +67,7 @@ class CKnifePg < Thor
       # pgpass format
       File.open(pg_pass_file, "w", 0600) { |f| f.write "#{conf[:host]}:#{conf[:port]}:*:#{conf[:username]}:#{conf[:password]}" }
 
-      result = yield
+      result = yield # don't know what we're planning to do with the result here...
 
       FileUtils.rm(pg_pass_file)
       if File.exists?(pg_pass_file)
@@ -109,12 +109,17 @@ class CKnifePg < Thor
     with_pg_pass_file do
       my_pid = pg_pass_file_execute(psql_invocation, "select pg_backend_pid();").split.first
       ids_output = pg_pass_file_execute(psql_invocation, "SELECT procpid, application_name FROM pg_stat_activity WHERE datname = '#{conf[:database]}' AND procpid != #{my_pid};")
-      table = ids_output.split.map { |line| line.split("|") }
-      print_table([["PID", "Application Name"]] + table, :indent => 2)
-      ids = table.map { |row| row.first }
 
-      say("If you would like to kill these sessions, you can do so with this command:")
-      say("kill -9 #{ids.join(' ')}")
+      if ids_output.nil?
+        say("Error while looking for session information. Possibly a failed login.")
+      else
+        table = ids_output.split.map { |line| line.split("|") }
+        print_table([["PID", "Application Name"]] + table, :indent => 2)
+        ids = table.map { |row| row.first }
+
+        say("If you would like to kill these sessions, you can do so with this command:")
+        say("kill -9 #{ids.join(' ')}")
+      end
     end
   end
 
