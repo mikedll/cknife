@@ -17,9 +17,11 @@ Install ruby and possibly bundler:
 
 Create a Gemfile with cknife and its git repository.
 
+
     source "http://rubygems.org"
-    
-    gem "cknife", :git => "https://github.com/mikedll/cknife.git"
+    git_source(:github) { |repo| "https://github.com/#{repo}.git" }
+
+    gem "cknife", '~> 1.1.0'
 
 Run bundle.
 
@@ -76,9 +78,10 @@ Setup your AWS key and secret in any of these methods, in order of priority:
   - $CWD/cknife.yml
   - $CWD/tmp/cknife.yml
   - environment variables: `KEY`, `SECRET`
-  - environment variablse: `AMAZON_ACCESS_KEY_ID`, `AMAZON_SECRET_ACCESS_KEY` 
+  - environment variables: `AMAZON_ACCESS_KEY_ID`, `AMAZON_SECRET_ACCESS_KEY` 
 
-The format of your cknife.yml must be like so:
+If using one of the above cknife.yml files to define your keys, the format
+is as follows:
 
     ---
     key: AKIAblahblahb...
@@ -360,13 +363,19 @@ One of the following, like patch. This will create a git commit.
     bundle exec rake version:bump:minor
     bundle exec rake version:bump:patch
 
-Create the gem spec.
+Do a git flow release. Create the gem spec and commit it:
 
     bundle exec rake gemspec:generate
     git commit -am "Generated gemspec for version 0.1.4"
 
-You can `rake release`... I think that deploys
-the gem to Rubygems.
+Do a git flow finish release. Push to github. You can
+then do a release to Rubygems. This command will
+try to generate the gemspec, but nothing will happen
+since the gemspec is already valid.
+
+    rake release
+
+### Building Locally (Optional)
 
 You may build a local gem:
 
