@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
   s.authors = ["Michael Rivera"]
   s.date = "2016-03-02"
   s.description = "A collection of command line tools, especially for popular API services."
-  s.email = "mrivera@michaelriveraco.com"
+  s.email = "soymrmike@gmail.com"
   s.executables = ["cknifeaws", "cknifedub", "cknifemail", "cknifemon", "cknifemysql", "cknifenowtimestamp", "cknifepg", "cknifewcdir", "cknifezerigo"]
   s.extra_rdoc_files = [
     "LICENSE",
