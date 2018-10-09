@@ -33,22 +33,30 @@ class CKnifePg < Thor
 
     def pg_pass_file_execute(cmd, input = nil)
       return if !@session_ok
-      puts cmd
+      puts cmd if options[:verbose]
       stdin, stdout, stderr, wait_thread = Open3.popen3({'PGPASSFILE' => pg_pass_file}, cmd)
       if input
-        puts input
+        puts input if options[:verbose]
         stdin.write input
         stdin.close
       end
       output = stdout.read
       output += stderr.read
-      $stdout.write output
+      $stdout.write output if options[:verbose]
       stdout.close
       stderr.close
       result = wait_thread.value.to_i
       @session_ok = @session_ok && (result == 0)
+
+      # I'm not sure why I allow blocks to this method. 2018-10-09
       yield if block_given?
       output
+    end
+
+    def write_pg_pass_file
+      # pgpass format
+      File.open(pg_pass_file, "w", 0600) { |f| f.write "#{conf[:host]}:#{conf[:port]}:*:#{conf[:username]}:#{conf[:password]}" }
+      pg_pass_file
     end
 
     def with_pg_pass_file
@@ -64,14 +72,16 @@ class CKnifePg < Thor
         return
       end
 
-      # pgpass format
-      File.open(pg_pass_file, "w", 0600) { |f| f.write "#{conf[:host]}:#{conf[:port]}:*:#{conf[:username]}:#{conf[:password]}" }
+      write_pg_pass_file
 
-      result = yield # don't know what we're planning to do with the result here...
-
-      FileUtils.rm(pg_pass_file)
-      if File.exists?(pg_pass_file)
-        say("Failed to remove pg_pass file. Please remove it for security purposes.")
+      result = nil
+      begin
+        result = yield # don't know what we're planning to do with the result here...
+      ensure
+        FileUtils.rm(pg_pass_file)
+        if File.exists?(pg_pass_file)
+          say("Failed to remove pg_pass file. Please remove it for security purposes.")
+        end
       end
 
       say
@@ -83,6 +93,7 @@ class CKnifePg < Thor
   end
 
   desc "disconnect", "Disconnect all sessions from the database. You must have a superuser configured for this to work."
+  method_options :verbose => false
   def disconnect
     with_pg_pass_file do
       my_pid = pg_pass_file_execute(psql_invocation, "select pg_backend_pid();").split.first
@@ -94,6 +105,7 @@ class CKnifePg < Thor
   end
 
   desc "capture", "Capture a dump of the database to db(current timestamp).dump."
+  method_options :verbose => false
   def capture
     file_name = "db" + Time.now.strftime("%Y%m%d%H%M%S") + ".dump"
 
@@ -105,6 +117,7 @@ class CKnifePg < Thor
   end
 
   desc "sessions", "List active sessions in this database and provide a string suitable for giving to kill for stopping those sessions."
+  method_options :verbose => false
   def sessions
     with_pg_pass_file do
       my_pid = pg_pass_file_execute(psql_invocation, "select pg_backend_pid();").split.first
@@ -123,8 +136,26 @@ class CKnifePg < Thor
     end
   end
 
+  desc "killalls", "Kill all sessions connected to the database."
+  method_options :verbose => false
+  method_options :noprompt => false
+  def killalls
+    if options[:noprompt] || yes?("Are you sure you want to destroy all active sessions connected to the database #{conf[:database]}?", :red)
+
+      with_pg_pass_file do
+        pg_pass_file_execute("psql #{connection_options} --no-align --tuples-only CREATE DATABASE #{conf[:database]}") do
+          say("Created #{conf[:database]} database.") if @session_ok
+        end
+      end
+    else
+      say("No action taken.")
+    end
+
+  end
+
   desc "restore", "Restore a file. Use the one with the most recent mtime by default. Searches for db*.dump files in the CWD."
   method_options :filename => nil
+  method_options :verbose => false
   def restore
     to_restore = options[:filename] if options[:filename]
     if to_restore.nil?
@@ -162,5 +193,91 @@ class CKnifePg < Thor
         end
       end
     end
+  end
+
+  desc "schema", "Dump the schema for all tables, or one table you specify."
+  method_options :verbose => false
+  def schema(table=nil)
+    table_string = table.nil? ? "" : "--table=#{table.strip}"
+    with_pg_pass_file do
+      output = pg_pass_file_execute("pg_dump #{connection_options} --no-owner --clean --if-exists --schema-only #{table_string} #{conf[:database]}")
+
+      # This command is so verbose that we only print the output if
+      # we didn't already do so in verbose mode.
+      puts output if !options[:verbose]
+    end
+  end
+
+  desc "stables", "List all tables."
+  method_options :verbose => false
+  def stables(table=nil)
+    sql = "SELECT
+    table_schema || '.' || table_name
+FROM
+    information_schema.tables
+WHERE
+    table_type = 'BASE TABLE'
+AND
+    table_schema NOT IN ('pg_catalog', 'information_schema');"
+
+    with_pg_pass_file do
+      output = pg_pass_file_execute(psql_invocation, sql)
+      tables = output.split.map do |ts|
+        ts =~ /^public\.(.*)$/
+        $1
+      end
+      puts tables.join("\n")
+    end
+  end
+
+  desc "fexec", "Execute a SQL script from a file on disk."
+  method_options :verbose => false
+  def fexec(file)
+    if !File.exists?(file)
+      say("'#{file}' does not exist.")
+      return
+    end
+
+    with_pg_pass_file do
+      pg_pass_file_execute("#{psql_invocation} -f #{file}") do
+        say("Ran #{file} SQL script.")
+      end
+    end
+  end
+
+  desc "dropdb", "Drop the database specified in your configuration."
+  method_options :verbose => false
+  def dropdb
+    with_pg_pass_file do
+      pg_pass_file_execute("#{psql_invocation} DROP DATABASE #{conf[:database]};") do
+        say("Dropped #{conf[:database]} database.") if @session_ok
+      end
+    end
+  end
+
+  desc "createdb", "Create a database having the name specified in your configuration. Assumes you have privileges to do this."
+  method_options :verbose => false
+  def createdb
+    with_pg_pass_file do
+      pg_pass_file_execute("psql #{connection_options} --no-align --tuples-only CREATE DATABASE #{conf[:database]}") do
+        say("Created #{conf[:database]} database.") if @session_ok
+      end
+    end
+  end
+
+  desc "perms", "Create a database having the name specified in your configuration. Assumes you have privileges to do this."
+  method_options :verbose => false
+  def perms
+    with_pg_pass_file do
+      pg_pass_file_execute("#{psql_invocation]}") do
+        puts "hmm."
+      end
+    end
+  end
+
+  desc "pgpass", "Write a .pgpass file in $CWD. Useful for start psql on your own."
+  def pgpassfile(file)
+    f = write_pg_pass_file
+    say("Wrote #{f}. Remember to delete it when you are done with it.")
   end
 end
