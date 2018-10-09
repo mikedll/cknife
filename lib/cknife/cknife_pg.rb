@@ -114,6 +114,18 @@ class CKnifePg < Thor
 
       result
     end
+
+    # Created to check for 9.2 system schema changes.
+    # Returns [9, 5, 12] for "9.5.12"
+    #
+    def pg_version
+      return @version if @version
+      output, stderr = Open3.capture2("psql --version")
+      output =~ Regexp.new("([0-9]+).([0-9]+)(.([0-9]+))")
+      v1, v2, v3 = $1, $2, $4
+      @version = [v1.to_i, v2.to_i, v3.to_i]
+    end
+
   end
 
   desc "disconnect", "Disconnect all sessions from the database. You must have a superuser configured for this to work."
@@ -143,9 +155,11 @@ class CKnifePg < Thor
   desc "sessions", "List active sessions in this database and provide a string suitable for giving to kill for stopping those sessions."
   method_option :verbose, :default => false, :type => :boolean, :desc => "Show which commands are invoked, any input given to them, and any output they give back."
   def sessions
+    pid_col = (pg_version[0] >= 9 and pg_version[1] >= 2) ? "pid" : "procpid"
+
     with_pg_pass_file do
       my_pid = pg_pass_file_execute(psql_invocation, "select pg_backend_pid();").split.first
-      ids_output = pg_pass_file_execute(psql_invocation, "SELECT procpid, application_name FROM pg_stat_activity WHERE datname = '#{conf[:database]}' AND procpid != #{my_pid};")
+      ids_output = pg_pass_file_execute(psql_invocation, "SELECT #{pid_col}, application_name FROM pg_stat_activity WHERE datname = '#{conf[:database]}' AND #{pid_col} != #{my_pid};")
 
       if ids_output.nil?
         say("Error while looking for session information. Possibly a failed login.")
