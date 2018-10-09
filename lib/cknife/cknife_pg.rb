@@ -84,8 +84,10 @@ class CKnifePg < Thor
         end
       end
 
+      msg = "Command failed."
+      msg += " If the --verbose flag is available for this command, you may try turning it on." if !options[:verbose]
       say
-      say("Command failed.", :red) if !@session_ok
+      say(msg, :red) if !@session_ok
       @session_live = false
 
       result
@@ -195,7 +197,7 @@ class CKnifePg < Thor
     end
   end
 
-  desc "schema", "Dump the schema for all tables, or one table you specify."
+  desc "schema [TABLE]?", "Dump the schema for all tables, or one table you specify."
   method_options :verbose => false
   def schema(table=nil)
     table_string = table.nil? ? "" : "--table=#{table.strip}"
@@ -210,7 +212,7 @@ class CKnifePg < Thor
 
   desc "stables", "List all tables."
   method_options :verbose => false
-  def stables(table=nil)
+  def tables(table=nil)
     sql = "SELECT
     table_schema || '.' || table_name
 FROM
@@ -230,7 +232,7 @@ AND
     end
   end
 
-  desc "fexec", "Execute a SQL script from a file on disk."
+  desc "fexec [FILE]", "Execute a SQL script from a file on disk."
   method_options :verbose => false
   def fexec(file)
     if !File.exists?(file)
@@ -245,22 +247,22 @@ AND
     end
   end
 
-  desc "dropdb", "Drop the database specified in your configuration."
-  method_options :verbose => false
-  def dropdb
-    with_pg_pass_file do
-      pg_pass_file_execute("#{psql_invocation} DROP DATABASE #{conf[:database]};") do
-        say("Dropped #{conf[:database]} database.") if @session_ok
-      end
-    end
-  end
-
   desc "createdb", "Create a database having the name specified in your configuration. Assumes you have privileges to do this."
   method_options :verbose => false
   def createdb
     with_pg_pass_file do
-      pg_pass_file_execute("psql #{connection_options} --no-align --tuples-only CREATE DATABASE #{conf[:database]}") do
+      pg_pass_file_execute("createdb #{connection_options} #{conf[:database]}") do
         say("Created #{conf[:database]} database.") if @session_ok
+      end
+    end
+  end
+
+  desc "dropdb", "Drop the database specified in your configuration."
+  method_options :verbose => false
+  def dropdb
+    with_pg_pass_file do
+      pg_pass_file_execute("dropdb #{connection_options} #{conf[:database]};") do
+        say("Dropped #{conf[:database]} database.") if @session_ok
       end
     end
   end
@@ -269,7 +271,7 @@ AND
   method_options :verbose => false
   def perms
     with_pg_pass_file do
-      pg_pass_file_execute("#{psql_invocation]}") do
+      pg_pass_file_execute("#{psql_invocation}") do
         puts "hmm."
       end
     end
