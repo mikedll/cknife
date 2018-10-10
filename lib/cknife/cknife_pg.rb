@@ -37,7 +37,7 @@ class CKnifePg < Thor
     end
 
     def dc(cmd)
-      puts "PGPASSFILE = #{pg_pass_file} #{cmd}"
+      puts "PGPASSFILE=#{pg_pass_file} #{cmd}"
     end
 
     def pg_pass_file_execute(cmd, input = nil)
@@ -324,7 +324,7 @@ AND
       File.unlink(pg_pass_file)
       say("Deleted .pgpass file.")
     else
-      say("The .pgpass file contents do not match what this tool would have generated. Please inspect the file to ensure it contains what you expect, and then delete it yourself.", :red)
+      say("The .pgpass file's contents do not match what this tool would have generated. Assuming you are trying to delete a .pgpass file that this tool did not generate, please inspect the file to ensure it contains what you expect, and then delete it yourself.", :red)
     end
   end
 
@@ -334,7 +334,7 @@ AND
   def psql
     if !File.exists?(pg_pass_file)
       if !options[:passfile]
-        say("You must prepare a .pgpass file for this command, or use --passfile to have this tool craete it for you. You can create a .pgpass file with the passfile command and delete it later with the dpassfile command.")
+        say("You must prepare a .pgpass file for this command, or use --passfile to have this tool create it for you. Alternatively, you can create a .pgpass file with the passfile command and delete it later with the dpassfile command.")
         return
       end
 
