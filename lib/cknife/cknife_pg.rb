@@ -99,8 +99,10 @@ class CKnifePg < Thor
         if !existing_pgpass
           FileUtils.rm(pg_pass_file)
           if File.exists?(pg_pass_file)
-            say("Failed to remove pg_pass file. Please remove it for security purposes.")
+            say("Failed to remove .pgpass file. Please remove it for your infrastructure's security.")
           end
+        else
+          say("Left existing .pgpass file on disk.", :yellow)
         end
       end
 
