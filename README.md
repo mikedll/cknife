@@ -152,7 +152,7 @@ One of the following, like patch. This will create a git commit.
 Do a git flow release. Create the gem spec and commit it:
 
     bundle exec rake gemspec:generate
-    git commit -am "Generated gemspec for version 0.1.4"
+    git commit -am "Generated gemspec for version 1.3.0"
 
 Do a git flow finish release. Push to github. You can
 then do a release to Rubygems. This command will
