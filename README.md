@@ -21,7 +21,9 @@ named `your-bucket-name`.
 
     > cknifeaws afew my-bucket --count=50
     
-That will show you 50 of them.
+That will show you 50 of them. See the
+[Wiki](https://github.com/mikedll/cknife/wiki) for details on the
+tools cknife has.
 
 # Why bother?
 
@@ -78,9 +80,6 @@ To be precise, cknife consists of command line executables. These
 tools often require more information from the user, which can be put
 into a configuration file, `cknife.yml`, in YAML format, and found by
 cknife in the current working directory ($CWD) when it is invoked.
-
-See the [Wiki](https://github.com/mikedll/cknife/wiki) for
-details on the tools cknife has.
 
 # Requirements
 
