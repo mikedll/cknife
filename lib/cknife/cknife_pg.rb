@@ -55,9 +55,15 @@ class CKnifePg < Thor
       stdout.close
       stderr.close
       result = wait_thread.value.to_i
-      @session_ok = @session_ok && (result == 0)
 
-      # I'm not sure why I allow blocks to this method. 2018-10-09
+      if result != 0
+        @session_ok = false
+        msg = "An error occurred."
+        msg += " If the --verbose flag is available for this command, you may try turning it on." if !options[:verbose]
+        say(msg, :red)
+      end
+
+      # I'm not sure why I use the block to this method. 2018-10-09
       yield if block_given?
       output
     end
@@ -106,12 +112,7 @@ class CKnifePg < Thor
         end
       end
 
-      msg = "Command failed."
-      msg += " If the --verbose flag is available for this command, you may try turning it on." if !options[:verbose]
-      say
-      say(msg, :red) if !@session_ok
       @session_live = false
-
       result
     end
 
@@ -126,18 +127,10 @@ class CKnifePg < Thor
       @version = [v1.to_i, v2.to_i, v3.to_i]
     end
 
-  end
-
-  desc "disconnect", "Disconnect all sessions from the database. You must have a superuser configured for this to work."
-  method_option :verbose, :default => false, :type => :boolean, :desc => "Show which commands are invoked, any input given to them, and any output they give back."
-  def disconnect
-    with_pg_pass_file do
-      my_pid = pg_pass_file_execute(psql_invocation, "select pg_backend_pid();").split.first
-      ids = pg_pass_file_execute(psql_invocation, "SELECT procpid FROM pg_stat_activity WHERE datname = '#{conf[:database]}' AND procpid != #{my_pid};")
-      ids.split.each do |pid|
-        pg_pass_file_execute(psql_invocation, "select pg_terminate_backend(#{pid});")
-      end
+    def pid_col_name
+      (pg_version[0] >= 9 and pg_version[1] >= 2) ? "pid" : "procpid"
     end
+
   end
 
   desc "capture", "Capture a dump of the database to db(current timestamp).dump."
@@ -152,43 +145,33 @@ class CKnifePg < Thor
     end
   end
 
-  desc "sessions", "List active sessions in this database and provide a string suitable for giving to kill for stopping those sessions."
+  desc "sessions", "List active sessions connected to this database. Also see the --kill option."
   method_option :verbose, :default => false, :type => :boolean, :desc => "Show which commands are invoked, any input given to them, and any output they give back."
+  method_option :kill, :default => false, :type => :boolean, :desc => "Kill all active sessions found. You must have superuser privileges configured for this to work."
   def sessions
-    pid_col = (pg_version[0] >= 9 and pg_version[1] >= 2) ? "pid" : "procpid"
-
     with_pg_pass_file do
-      my_pid = pg_pass_file_execute(psql_invocation, "select pg_backend_pid();").split.first
-      ids_output = pg_pass_file_execute(psql_invocation, "SELECT #{pid_col}, application_name FROM pg_stat_activity WHERE datname = '#{conf[:database]}' AND #{pid_col} != #{my_pid};")
+      if !options[:kill]
+        my_pid = pg_pass_file_execute(psql_invocation, "select pg_backend_pid();").split.first
+        ids_output = pg_pass_file_execute(psql_invocation, "SELECT #{pid_col_name}, application_name FROM pg_stat_activity WHERE datname = '#{conf[:database]}' AND #{pid_col_name} != #{my_pid};")
 
-      if ids_output.nil?
-        say("Error while looking for session information. Possibly a failed login.")
-      else
+        return if ids_output.nil?
+
         table = ids_output.split.map { |line| line.split("|") }
         print_table([["PID", "Application Name"]] + table, :indent => 2)
-        ids = table.map { |row| row.first }
+        say("To kill all active sessions connected to this database, you can use the --kill option with this command.")
+      else
+        sql = "SELECT pg_terminate_backend(pg_stat_activity.#{pid_col_name})
+FROM pg_stat_activity
+WHERE pg_stat_activity.datname = '#{conf[:database]}'
+      AND pid <> pg_backend_pid();"
 
-        say("If you would like to kill these sessions, you can do so with this command:")
-        say("kill -9 #{ids.join(' ')}")
-      end
-    end
-  end
-
-  desc "killalls", "Kill all sessions connected to the database."
-  method_option :verbose, :default => false, :type => :boolean, :desc => "Show which commands are invoked, any input given to them, and any output they give back."
-  method_options :noprompt => false
-  def killalls
-    if options[:noprompt] || yes?("Are you sure you want to destroy all active sessions connected to the database #{conf[:database]}?", :red)
-
-      with_pg_pass_file do
-        pg_pass_file_execute("psql #{connection_options} --no-align --tuples-only CREATE DATABASE #{conf[:database]}") do
-          say("Created #{conf[:database]} database.") if @session_ok
+        with_pg_pass_file do
+          pg_pass_file_execute(psql_invocation, sql) do
+            say("Terminated all sessions.") if @session_ok
+          end
         end
       end
-    else
-      say("No action taken.")
     end
-
   end
 
   desc "restore [FILENAME]?", "Restore a file. If no filename is provided, searches for db*.dump files in the $CWD. It will pick the one with the most recent mtime."
