@@ -102,103 +102,22 @@ Here are the command line executables:
   - cknifenowtimestamp
   - cknifepg
   - cknifewcdir
-  - cknifezerigo
 
 You can invoke any of them like this:
 
     bundle exec cknifeaws
 
-# SMTP Email Command Line Interface
+# Security Awareness
 
-    > cknifemail help
-    Tasks:
-      cknifemail help [TASK]                             # Describe available tasks or one specific task
-      cknifemail mail [RECIPIENT] [SUBJECT] [TEXT_FILE]  # Send an email to recipient.
+Since the `cknife.yml` holds sensitive information in the name of
+convenience, you may choose to erase it after you're done with what
+you're doing with it. It depends on your use, of course. You probably
+want to add it to your `.gitignore` file if you're using it on a
+per-project basis.
 
-Only simple email sending is available here, for now.
+# Development
 
-### Send an email
-
-    > bundle exec ./bin/cknifemail help mail 
-    Usage:
-      cknifemail mail [RECIPIENT] [SUBJECT] [TEXT_FILE]
-
-    Options:
-      [--from=FROM]      
-      [--simple-format]  
-                         # Default: true
-
-The `simple_format` option is available to help format plaintext
-emails whose bodies you don't want messed up when newlines are ignored
-with html formatting. This is helpful for when log files are included
-in email bodies, which is the primary expectation for how this will
-be used.
-
-Has been successfully tested with the SMTP interface to Amazon SES and
-Sendgrid. Should work with Postmark just fine.
-
-This **requires** the cknife YAML config, with the following field structure.
-
-    mail:
-      from: "Rick Santana <rick.santana@example.com>"
-      authentication: login
-      address: smtp-server
-      port: smtp-port (defaults to 587)
-      username: yoursmtpusername
-      password: yoursmtppassword
-      domain: domain-if-you-like.com
-
-
-
-# Zerigo Command Line Interface
-
-The These tasks can be used to manage your DNS via Zerigo.  They changed
-their rates drastically with little notice in January of 2014, so I
-switched to DNS Simple and don't use this much anymore.
-
-    > cknifezerigo help
-    Tasks:
-      cknifezerigo create [HOST_NAME]  # Create a host
-      cknifezerigo delete [ID]         # Delete an entry by id
-      cknifezerigo help [TASK]         # Describe available tasks or one specific task
-      cknifezerigo list                # List available host names.
-
-# PostgreSQL Backups
-
-This is a wrapper around the PostgreSQL backup and restore command
-line utilities.
-
-It requires the following Rails-style configuration in the
-configuration file:
-
-    pg:
-      host: localhost
-      database: dbname
-      username: dbuser
-      password: dbpassword
-
-**Warning:** do not use a colon in your password, or the password
-configuration will not work. This is a shortcoming of this project and
-a consequence of the `.pgpass` file format used by PostgreSQL.
-
-Then you can capture a snapshot of your database. You can also restore
-it using this tool.
-
-    > bundle exec cknifepg help 
-    Tasks:
-      cknifepg capture      # Capture a dump of the database to db(current timestamp).dump.
-      cknifepg disconnect   # Disconnect all sessions from the database. You must have a superuser configured for this to work.
-      cknifepg help [TASK]  # Describe available tasks or one specific task
-      cknifepg restore      # Restore a file. Use the one with the most recent mtime by default. Searches for db*.dump files in the CWD.
-      cknifepg sessions     # List active sessions in this database and provide a string suitable for giving to kill for stopping those sessions.
-
-This generates and deletes a `.pgpass` file before and after the
-command line session. Be aware that if this process is interrupted,
-the `.pgpass` file may be left on disk in the CWD.
-
-## Gem Development
-
-### Making a release
+## Making a release
 
 One of the following, like patch. This will create a git commit.
 
@@ -218,7 +137,7 @@ since the gemspec is already valid.
 
     rake release
 
-### Building Locally (Optional)
+## Building Locally (Optional)
 
 You may build a local gem:
 
@@ -228,7 +147,7 @@ And remove it:
 
     rm pkg/cknife-0.1.6.gem
 
-### Invoking commands without clobbering the gemspec
+## Invoking commands without clobbering the gemspec
 
 You can uncommente the 'gem cknife' line in the Gemfile.
 
