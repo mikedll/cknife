@@ -1,5 +1,29 @@
 
-# Overview
+# Quickstart
+
+cknife is a set of command line tools. They...do different things.
+
+    > \curl -sSL https://get.rvm.io | bash -s stable --ruby
+    > gem install cknife
+
+Create `$CWD/tmp/cknife.yml` and put in a AWS key-secret pair:
+
+    ---
+    key: AKIAblahblahb...
+    secret: 8xILhOsecretsecretsecretsecret...
+
+Then invoke the `cknifeaws` tool.
+
+    > cknifeaws afew your-bucket-name
+
+That will show you a few files in that Amazon S3 bucket of yours
+named `your-bucket-name`.
+
+    > cknifeaws afew my-bucket --count=50
+    
+That will show you 50 of them.
+
+# Why bother?
 
 What do you do when you don't want to write
 [bash](https://www.tldp.org/LDP/Bash-Beginners-Guide/html/Bash-Beginners-Guide.html),
@@ -50,13 +74,13 @@ documentation may be a little scattered. It can be used
 to bang on a piece of technology for the sake of your own
 learning, too.
 
-To be precise, cknife consists of command line executables. The tools
-often require more information from the user, which can be put into a
-configuration file (`cknife.yml`) in YAML format, and found by cknife
-in the current working directory ($CWD) when it is invoked.
+To be precise, cknife consists of command line executables. These
+tools often require more information from the user, which can be put
+into a configuration file, `cknife.yml`, in YAML format, and found by
+cknife in the current working directory ($CWD) when it is invoked.
 
 See the [Wiki](https://github.com/mikedll/cknife/wiki) for
-more documentation.
+details on the tools cknife has.
 
 # Requirements
 
