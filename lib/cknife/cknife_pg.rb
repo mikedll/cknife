@@ -287,13 +287,12 @@ AND
     end
   end
 
-  desc "perms", "Create a database having the name specified in your configuration. Assumes you have privileges to do this."
+  desc "perms", "List all users (roles) for the database, and their attributes (which approximate privileges)."
   method_option :verbose, :default => false, :type => :boolean, :desc => "Show which commands are invoked, any input given to them, and any output they give back."
   def perms
     with_pg_pass_file do
-      pg_pass_file_execute("#{psql_invocation}") do
-        puts "hmm."
-      end
+      output = pg_pass_file_execute("#{psql_easy}", "\\du")
+      puts output if !options[:verbose]
     end
   end
 
