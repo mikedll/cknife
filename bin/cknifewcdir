@@ -32,7 +32,7 @@ class CKnifeWcdir < Thor
     start_point = options[:start].empty? ? "." : options[:start].chomp('/')
 
     pattern_s = "\\( " + patterns.map { |p| "-name #{p}" }.join(' -o ') + " \\) "
-    skip_s = options[:skip].empty? ? "" : "-type d \\( " + options[:skip].map { |dir| "-path #{start_point}/#{dir}" }.join(' -o ') +  " \\) -prune -o "
+    skip_s = options[:skip].empty? ? "" : "-type d \\( " + options[:skip].map { |dir| "-path #{start_point}/#{dir.chomp('/')}" }.join(' -o ') +  " \\) -prune -o "
 
     # note patterns must go after the skips (after the -prune -o)
     cmd = "find #{start_point} #{skip_s}#{pattern_s} -exec wc -l {} \\;"
