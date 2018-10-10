@@ -117,14 +117,14 @@ these two places, in order:
 
 Here are the command line executables:
 
-  - cknifeaws
-  - cknifedub
-  - cknifemail  
-  - cknifemon
-  - cknifemysql
-  - cknifenowtimestamp
-  - cknifepg
-  - cknifewcdir
+  - cknifeaws - AWS wrappers.
+  - cknifemail - SMTP email sender.
+  - cknifemon - Daemon that sends heartbeat signals to a place of your choosing.
+  - cknifemysql - MySQL utilities.
+  - cknifepg - PostgreSQL utilities.
+  - cknifewcdir - Lines-of-code calculator.
+  - cknifedub - Spot directories that are particularly space-consuming.
+  - cknifenowtimestamp - Get a now() timestamp string.
 
 You can invoke any of them like this:
 
