@@ -116,7 +116,7 @@ GEM
       mime-types (>= 1.16, < 3.0)
       netrc (~> 0.7)
     semver2 (3.4.2)
-    thor (0.14.6)
+    thor (0.20.0)
     thread_safe (0.3.6)
     treetop (1.4.15)
       polyglot
