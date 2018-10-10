@@ -1,28 +1,67 @@
 #!/usr/bin/env ruby
 
-def run
-  wccmd = `find . -ipath #{ARGV[0]} -exec wc -l {} \\;`
+require 'thor'
 
-  comps = []
+class CKnifeWcdir < Thor
 
-  total = 0
-  wccmd.split(/\n/).each do |l|
-    l =~ /\s*(\d+(\.\d+)?)\s+(.*)$/
-    size = $1
-    path = $3
-    comps << [size.to_i, path]
-    total += size.to_i
+  default_task :count
+
+  class_option :verbose, :default => false, :type => :boolean, :desc => "Show which commands are invoked, any input given to them, and any output they give back."
+
+  desc "count [PATTERNS] or simply [PATTERNS] without count will work", "Count lines of code in files matching the [PATTERNS] in the $CWD. Use patterns like this: *.rb, *.php."
+  long_desc <<-LONGDESC
+      Counts lines of code in the $CWD. Prints the files found, and
+      their line counts, in descending order of line count.
+
+      Requires patterns such as *.rb, or *.php, so that it knows what
+      files to count (it doesn't use a default file type).
+
+      You can supply directory names to exclude from consideration,
+      such as 'vendor' or 'node_modules'.
+
+      --skip=vendor node_modules
+
+      > cknifewcdir *.rb *.js --skip=vendor node_modules
+      \x5(...results...)
+
+      This is a wrapper around the find and wc posix commands.
+  LONGDESC
+  method_option :start, :type => :string, :default => "", :desc => "location to begin your search"
+  method_option :skip, :type => :array, :default => [], :desc => "names of directories to skip"
+  def count(*patterns)
+    start_point = options[:start].empty? ? "." : options[:start].chomp('/')
+
+    pattern_s = "\\( " + patterns.map { |p| "-name #{p}" }.join(' -o ') + " \\) "
+    skip_s = options[:skip].empty? ? "" : "-type d \\( " + options[:skip].map { |dir| "-path #{start_point}/#{dir.chomp('/')}" }.join(' -o ') +  " \\) -prune -o "
+
+    # note patterns must go after the skips (after the -prune -o)
+    cmd = "find #{start_point} #{skip_s}#{pattern_s} -exec wc -l {} \\;"
+
+    puts cmd if options[:verbose]
+    wccmd = `#{cmd}`
+
+    comps = []
+
+    total = 0
+    wccmd.split(/\n/).each do |l|
+      l =~ /\s*(\d+(\.\d+)?)\s+(.*)$/
+      size = $1
+      path = $3
+      comps << [size.to_i, path]
+      total += size.to_i
+    end
+
+    comps.sort! do |a, b|
+      b[0] <=> a[0]
+    end
+
+    print_table([["LOC", "File"]] + comps)
+
+    puts "Total: #{total}"
   end
 
-  comps.sort! do |a, b|
-    b[0] <=> a[0]
-  end
-
-  comps.each do |(size,path)|
-    printf( "%d %s\n", size, path)
-  end
-
-  puts "Total: #{total}"
 end
 
-run
+ARGV.unshift(CKnifeWcdir.default_task) unless CKnifeWcdir.all_tasks.has_key?(ARGV[0])
+CKnifeWcdir.start(ARGV)
+
