@@ -147,7 +147,7 @@ class CKnifePg < Thor
 
   desc "sessions", "List active sessions connected to this database. Also see the --kill option."
   method_option :verbose, :default => false, :type => :boolean, :desc => "Show which commands are invoked, any input given to them, and any output they give back."
-  method_option :kill, :default => false, :type => :boolean, :desc => "Kill all active sessions found. You must have superuser privileges configured for this to work."
+  method_option :kill, :default => false, :type => :boolean, :desc => "Kill all active sessions found. You must have sufficient privileges or correct process ownership for this to work."
   def sessions
     with_pg_pass_file do
       if !options[:kill]
