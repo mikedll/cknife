@@ -1,4 +1,6 @@
 
+[![Gem Version](https://badge.fury.io/rb/cknife.svg)](https://badge.fury.io/rb/cknife)
+
 # Quickstart
 
 cknife is a set of command line tools. They...do different things.
