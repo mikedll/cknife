@@ -21,65 +21,13 @@ named `your-bucket-name`.
 
     > cknifeaws afew my-bucket --count=50
     
-That will show you 50 of them. See the
+That will show you 50 of them. You can see the help for this command, too.
+
+    > cknifeaws help
+
+See the
 [Wiki](https://github.com/mikedll/cknife/wiki) for details on the
-tools cknife has.
-
-# Why bother?
-
-What do you do when you don't want to write
-[bash](https://www.tldp.org/LDP/Bash-Beginners-Guide/html/Bash-Beginners-Guide.html),
-your `.bash_profile` already has more aliases than you can manage, and
-yet you still find it silly to be going to the same [old documentation
-websites](https://www.postgresql.org/docs/9.5/static/backup-dump.html)
-for things you are certain you once knew how to do?
-
-Well, you can write a script in something other than
-bash to automate the precise command line invocation
-that you used to accomplish a task. But when you
-move to a different project, how can you take your
-scripts with you? Why not design your scripts
-to be robust enough so that they are conventional?
-
-Why can't a [Stackoverflow](https://stackoverflow.com) question's
-answer be captured in a form that can be configured and called by you
-(or someone who was in your position before), so that you don't have
-to enter the same question into
-[google.com](https://www.google.com/?q=LOL%20HALP%20ME%20CODE) again
-later down the road?
-
-Why make a browser bookmark if you can skip the browser entirely?
-It's not like the browser bookmark can compile the answer into machine
-code for you, anyway.
-
-If someone turns the answer into a programmed tool, what if your IDE
-is no better than the command line when it comes to invoking it?
-
-I created cknife to have a set of scripts to fall back on when
-confronted with the above encounter I've been having for years. cknife
-is a toolset that encapsulates common command line expressions that
-developers use when at work.
-
-I've never used [chef](https://www.chef.io), but were I to grow
-cknife, I wouldn't be surprised to see it overlap with it.
-
-cknife currently has some wrappers around Amazon's EC2 and S3
-services. It has others around MySQL and PostgreSQL. It has a trivial
-one around [du](http://man7.org/linux/man-pages/man1/du.1.html).  The
-`cknifemon` tool, meanwhile, is a daemon that can launch PUT HTTP
-requests to an endpoint you configure, on a schedule.
-
-It can be used for system administration, but it can be also be used
-to aid developers as they acclimate themselves to a piece of
-technology with which they may not be familiar, and for which
-documentation may be a little scattered. It can be used
-to bang on a piece of technology for the sake of your own
-learning, too.
-
-To be precise, cknife consists of command line executables. These
-tools often require more information from the user, which can be put
-into a configuration file, `cknife.yml`, in YAML format, and found by
-cknife in the current working directory ($CWD) when it is invoked.
+tools cknife has. A complete list of the tools is below under 'usage'.
 
 # Requirements
 
