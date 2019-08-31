@@ -16,7 +16,7 @@ gem 'loofah', '~> 2.2.3'
 # Add dependencies to develop your gem here.
 # Include everything needed to run rake, tests, features, etc.
 group :development do
-  gem "cknife", :path => "." # this arguably makes it easier to test quickly, locally.
+  # gem "cknife", :path => "." # this arguably makes it easier to test quickly, locally.
   gem "bundler", "~> 1.0"
   gem "jeweler", "~> 2.1"
 end
