@@ -1,7 +1,7 @@
 source "http://rubygems.org"
 
 gem "rest-client", '>= 1.8.0', '~> 1'
-gem "nokogiri", '>= 1.8.2', '~> 1'
+gem "nokogiri", ">= 1.10.4", '~> 1'
 gem "i18n", '>= 0.6.6'
 gem "activesupport", '>= 4.2.9'
 gem "actionpack", '>= 4.2.9'
