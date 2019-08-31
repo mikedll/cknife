@@ -75,7 +75,7 @@ GEM
       rdoc
       semver2
     jwt (1.5.6)
-    loofah (2.2.2)
+    loofah (2.2.3)
       crass (~> 1.0.2)
       nokogiri (>= 1.5.9)
     mail (2.5.5)
@@ -139,6 +139,7 @@ DEPENDENCIES
   fog-aws (< 3.0)
   i18n (>= 0.6.6)
   jeweler (~> 2.1)
+  loofah (~> 2.2.3)
   mail (~> 2.5.5)
   nokogiri (~> 1, >= 1.8.2)
   rest-client (~> 1, >= 1.8.0)
@@ -146,4 +147,4 @@ DEPENDENCIES
   unf (~> 0, >= 0.1)
 
 BUNDLED WITH
-   1.16.5
+   1.16.6

@@ -36,6 +36,7 @@ class CKnifePg < Thor
       @pg_pass_file = ".pgpass"
     end
 
+    # dump command?
     def dc(cmd)
       puts "PGPASSFILE=#{pg_pass_file} #{cmd}"
     end
@@ -304,7 +305,7 @@ AND
       return
     end
 
-    f = write_pg_pass_file
+    write_pg_pass_file
     say("Wrote #{pg_pass_file} to $CWD.")
     say(connect_msg)
     say("Remember to delete the .pgpass file when you are finished.")
