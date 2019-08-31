@@ -44,6 +44,8 @@ pkg
 # For rubinius:
 #*.rbc
 
+.envrc
+
 tmp/**/*
 tmp/*
 

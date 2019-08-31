@@ -31,7 +31,7 @@ class CKnifeWcdir < Thor
   def count(*patterns)
     start_point = options[:start].empty? ? "." : options[:start].chomp('/')
 
-    pattern_s = "\\( " + patterns.map { |p| "-name #{p}" }.join(' -o ') + " \\) "
+    pattern_s = "\\( " + patterns.map { |p| "-name '#{p}'" }.join(' -or ') + " \\) "
     skip_s = options[:skip].empty? ? "" : "-type d \\( " + options[:skip].map { |dir| "-path #{start_point}/#{dir.chomp('/')}" }.join(' -o ') +  " \\) -prune -o "
 
     # note patterns must go after the skips (after the -prune -o)
