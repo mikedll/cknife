@@ -8,7 +8,7 @@ class CKnifeWcdir < Thor
 
   class_option :verbose, :default => false, :type => :boolean, :desc => "Show which commands are invoked, any input given to them, and any output they give back."
 
-  desc "count [PATTERNS] or simply [PATTERNS] without count will work", "Count lines of code in files matching the [PATTERNS] in the $CWD. Use patterns like this: *.rb, *.php."
+  desc "count [PATTERNS] or simply [PATTERNS] without count will work", "Count lines of code in files matching the [PATTERNS] in the $CWD. Use patterns like this: \"*.rb\", \"*.php.\" (double quotes may be required)"
   long_desc <<-LONGDESC
       Counts lines of code in the $CWD. Prints the files found, and
       their line counts, in descending order of line count.
@@ -16,12 +16,14 @@ class CKnifeWcdir < Thor
       Requires patterns such as *.rb, or *.php, so that it knows what
       files to count (it doesn't use a default file type).
 
+      Put double quotes around the patterns.
+
       You can supply directory names to exclude from consideration,
       such as 'vendor' or 'node_modules'.
 
       --skip=vendor node_modules
 
-      > cknifewcdir *.rb *.js --skip=vendor node_modules
+      > cknifewcdir "*.rb" "*.js" --skip=vendor node_modules
       \x5(...results...)
 
       This is a wrapper around the find and wc posix commands.
