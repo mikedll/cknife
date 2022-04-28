@@ -48,7 +48,8 @@ GEM
       fog-core
       nokogiri (>= 1.5.11, < 2.0.0)
     formatador (0.2.5)
-    git (1.5.0)
+    git (1.11.0)
+      rchardet (~> 1.8)
     github_api (0.16.0)
       addressable (~> 2.4.0)
       descendants_tracker (~> 0.0.4)
@@ -110,6 +111,7 @@ GEM
     rails-html-sanitizer (1.0.4)
       loofah (~> 2.2, >= 2.2.2)
     rake (12.3.1)
+    rchardet (1.8.0)
     rdoc (6.0.4)
     rest-client (1.8.0)
       http-cookie (>= 1.0.2, < 2.0)
