@@ -20,7 +20,7 @@ module CKnife
     end
 
     def delete_opt_file
-      if !File.exists?(option_file)
+      if !File.file?(option_file)
         thor_output.say("No #{option_file} file to delete.")
         return
       end
@@ -35,7 +35,7 @@ module CKnife
     end
 
     def create_opt_file(connect_msg)
-      if File.exists?(option_file)
+      if File.file?(option_file)
         thor_output.say("A #{option_file} file is already present.")
         thor_output.say(connect_msg)
         return
@@ -83,7 +83,7 @@ module CKnife
       @session_ok = true
 
       existing_option_file = false
-      if File.exists?(option_file)
+      if File.file?(option_file)
         existing_option_file = true
         s = File.read(option_file)
         if s != option_file_contents
@@ -100,7 +100,7 @@ module CKnife
       ensure
         if !existing_option_file
           FileUtils.rm(option_file)
-          if File.exists?(option_file)
+          if File.file?(option_file)
             thor_output.say("Failed to remove #{option_file} file. Please remove it for your infrastructure's security.")
           end
         else
