@@ -26,7 +26,7 @@ class CKnifeAws < Thor
         config_file = [["cknife.yml"], ["tmp", "cknife.yml"]].map { |args|
           here.join(*args)
         }.select { |path|
-          File.exists?(path)
+          File.file?(path)
         }.first
       end
 
@@ -312,7 +312,7 @@ class CKnifeAws < Thor
 
     say("This is a dry run.") if options[:dry_run]
 
-    if !File.exists?(directory) || !File.directory?(directory)
+    if !File.directory?(directory)
       say("'#{directory} does not exist or is not a directory.")
       return
     end
@@ -512,7 +512,7 @@ class CKnifeAws < Thor
       return
     end
 
-    if !File.exists?(file_name)
+    if !File.file?(file_name)
       say("Found no such file #{file_name} on the local disk.")
       return
     end
