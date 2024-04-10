@@ -67,7 +67,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency(%q<fog-aws>.freeze, ["< 3.0".freeze])
   s.add_runtime_dependency(%q<unf>.freeze, [">= 0.1".freeze, "~> 0".freeze])
   s.add_runtime_dependency(%q<daemons>.freeze, [">= 0".freeze])
-  s.add_runtime_dependency(%q<loofah>.freeze, ["~> 2".freeze])
+  s.add_runtime_dependency(%q<loofah>.freeze, ["~> 2.2.3".freeze])
   s.add_development_dependency(%q<bundler>.freeze, ["~> 2.0".freeze])
   s.add_development_dependency(%q<jeweler>.freeze, ["~> 2.1".freeze])
 end
