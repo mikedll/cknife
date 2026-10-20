@@ -43,7 +43,7 @@ module CKnife
     desc "console", "Launch mysql console."
     method_option :myfile, :type => :boolean, :default => false, :desc => "Write my.cnf file if it doesn't exist."
     def console
-      if !File.exists?(option_file)
+      if !File.file?(option_file)
         if !options[:myfile]
           say("You must prepare a #{option_file} file for this command, or use --myfile to have this tool create it for you. Alternatively, you can create a #{option_file} file with the myfile command and delete it later with the dmyfile command.")
           return
@@ -70,7 +70,7 @@ module CKnife
     def capture
       file_name = "db" + Time.now.strftime("%Y%m%d%H%M%S") + ".sql"
 
-      if File.exists?(file_name)
+      if File.file?(file_name)
         say("File already exists: #{file_name}.", :red)
       end
 

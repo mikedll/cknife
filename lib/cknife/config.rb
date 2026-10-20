@@ -22,7 +22,7 @@ module CKnife
         config_file = [["cknife.yml"], ["tmp", "cknife.yml"]].map { |args|
           here.join(*args)
         }.select { |path|
-          File.exists?(path)
+          File.file?(path)
         }.first
       end
 
